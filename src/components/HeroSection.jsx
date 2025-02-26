@@ -58,11 +58,11 @@ const HeroSection = () => {
               {/* Dashboard preview with proper light/dark styling */}
               <div className="bg-white dark:bg-gray-800 p-2 rounded-xl shadow-xl border border-gray-200 dark:border-gray-700 relative z-10">
                 <img 
-                  src="/dashboard-preview.png" 
+                  src="https://images.unsplash.com/photo-1551288049-bebda4e38f71?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=800&h=500&q=80" 
                   alt="SaaSPro Dashboard Preview" 
                   className="w-full h-auto rounded-lg border border-gray-100 dark:border-gray-700"
                   onError={(e) => {
-                    e.target.src = 'https://via.placeholder.com/800x500?text=SaaSPro+Dashboard';
+                    e.target.src = 'https://images.unsplash.com/photo-1460925895917-afdab827c52f?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=800&h=500&q=80';
                   }}
                 />
               </div>
