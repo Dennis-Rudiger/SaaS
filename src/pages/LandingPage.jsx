@@ -6,6 +6,7 @@ import FeaturesSection from '../components/FeaturesSection';
 import TestimonialsSection from '../components/TestimonialsSection';
 import PricingSection from '../components/PricingSection';
 import FAQSection from '../components/FAQSection';
+import ContactSection from '../components/ContactSection';
 import CTASection from '../components/CTASection';
 import { trackPageView } from '../utils/analytics';
 import { scrollToTop } from '../utils/ScrollToSection';
@@ -29,6 +30,7 @@ const LandingPage = () => {
         <PricingSection />
         <FAQSection />
         <CTASection />
+        <ContactSection/>
       </main>
       <Footer />
     </div>
