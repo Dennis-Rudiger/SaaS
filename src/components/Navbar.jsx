@@ -95,8 +95,9 @@ const Navbar = () => {
                 </li>
                 <li>
                   <Link 
-                    to="/contact"
-                    className={`${location.pathname === '/contact' ? 'text-primary' : 'text-gray-700 dark:text-gray-300'} hover:text-primary transition`}
+                    to="#contact"
+                    onClick={(e) => handleNavClick(e, 'contact')}
+                    className={`${'text-gray-700 dark:text-gray-300'} hover:text-primary transition`}
                   >
                     Contact
                   </Link>
