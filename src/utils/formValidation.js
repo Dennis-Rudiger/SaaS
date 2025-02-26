@@ -1,29 +1,77 @@
-// Email validation
+/**
+ * Validates email format
+ * @param {string} email - The email address to validate
+ * @returns {boolean} - True if the email format is valid
+ */
 export const validateEmail = (email) => {
   const re = /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
   return re.test(String(email).toLowerCase());
 };
 
-// Password validation - requires at least 8 characters, one uppercase, one lowercase and one number
+/**
+ * Validates password strength
+ * @param {string} password - The password to validate
+ * @returns {boolean} - True if the password meets strength requirements
+ */
 export const validatePassword = (password) => {
-  const re = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[a-zA-Z\d]{8,}$/;
+  // At least 8 characters, 1 uppercase letter, 1 lowercase letter, and 1 number
+  const re = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/;
   return re.test(password);
 };
 
-// Phone number validation - basic format check
-export const validatePhone = (phone) => {
-  const re = /^\+?[1-9]\d{9,14}$/;
-  return re.test(phone);
-};
-
-// URL validation
+/**
+ * Validates a URL format
+ * @param {string} url - The URL to validate
+ * @returns {boolean} - True if the URL format is valid
+ */
 export const validateURL = (url) => {
   try {
     new URL(url);
     return true;
-  } catch (error) {
+  } catch (e) {
     return false;
   }
+};
+
+/**
+ * Validates phone number format
+ * @param {string} phone - The phone number to validate
+ * @returns {boolean} - True if the phone number format is valid
+ */
+export const validatePhone = (phone) => {
+  // Basic phone validation - adjust as needed for your requirements
+  const re = /^\+?[0-9]{10,15}$/;
+  return re.test(phone.replace(/[\s()\-]/g, ''));
+};
+
+/**
+ * Checks if a string is empty or only contains whitespace
+ * @param {string} value - The string to check
+ * @returns {boolean} - True if the string is not empty
+ */
+export const isNotEmpty = (value) => {
+  return value.trim().length > 0;
+};
+
+/**
+ * Validates file size
+ * @param {File} file - The file to validate
+ * @param {number} maxSizeMB - Maximum file size in MB
+ * @returns {boolean} - True if the file size is valid
+ */
+export const validateFileSize = (file, maxSizeMB) => {
+  const maxSizeBytes = maxSizeMB * 1024 * 1024;
+  return file.size <= maxSizeBytes;
+};
+
+/**
+ * Validates file type
+ * @param {File} file - The file to validate
+ * @param {Array<string>} allowedTypes - Array of allowed MIME types
+ * @returns {boolean} - True if the file type is allowed
+ */
+export const validateFileType = (file, allowedTypes) => {
+  return allowedTypes.includes(file.type);
 };
 
 // Required field validation
