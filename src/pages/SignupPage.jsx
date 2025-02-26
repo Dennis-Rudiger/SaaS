@@ -1,177 +1,174 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { validateEmail, validatePassword } from '../utils/formValidation';
-import Navbar from '../components/Navbar';
-import Footer from '../components/Footer';
+import { motion } from 'framer-motion';
+import DarkModeToggle from '../components/DarkModeToggle';
 
 const SignupPage = () => {
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
-    firstName: '',
-    lastName: '',
+    fullName: '',
     email: '',
     password: '',
     confirmPassword: '',
     companyName: '',
-    agreeTerms: false
+    agreeTerms: false,
   });
   const [errors, setErrors] = useState({});
   const [isLoading, setIsLoading] = useState(false);
+  const [signupError, setSignupError] = useState('');
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
-    setFormData(prevData => ({
-      ...prevData,
-      [name]: type === 'checkbox' ? checked : value
+    setFormData((prev) => ({
+      ...prev,
+      [name]: type === 'checkbox' ? checked : value,
     }));
     
-    // Clear error when user starts typing
+    // Clear error when field is being edited
     if (errors[name]) {
-      setErrors(prev => ({ ...prev, [name]: '' }));
+      setErrors((prev) => ({
+        ...prev,
+        [name]: '',
+      }));
     }
   };
 
   const validateForm = () => {
-    const newErrors = {};
-    
-    // First name validation
-    if (!formData.firstName.trim()) {
-      newErrors.firstName = 'First name is required';
+    let formErrors = {};
+    let isValid = true;
+
+    if (!formData.fullName.trim()) {
+      formErrors.fullName = 'Full name is required';
+      isValid = false;
     }
-    
-    // Last name validation
-    if (!formData.lastName.trim()) {
-      newErrors.lastName = 'Last name is required';
-    }
-    
-    // Email validation
+
     if (!formData.email.trim()) {
-      newErrors.email = 'Email is required';
-    } else if (!validateEmail(formData.email)) {
-      newErrors.email = 'Please enter a valid email address';
+      formErrors.email = 'Email is required';
+      isValid = false;
+    } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
+      formErrors.email = 'Email is invalid';
+      isValid = false;
     }
-    
-    // Password validation
+
     if (!formData.password) {
-      newErrors.password = 'Password is required';
-    } else if (!validatePassword(formData.password)) {
-      newErrors.password = 'Password must be at least 8 characters with 1 uppercase, 1 lowercase and 1 number';
+      formErrors.password = 'Password is required';
+      isValid = false;
+    } else if (formData.password.length < 8) {
+      formErrors.password = 'Password must be at least 8 characters long';
+      isValid = false;
     }
-    
-    // Confirm password validation
-    if (!formData.confirmPassword) {
-      newErrors.confirmPassword = 'Please confirm your password';
-    } else if (formData.password !== formData.confirmPassword) {
-      newErrors.confirmPassword = 'Passwords do not match';
+
+    if (formData.password !== formData.confirmPassword) {
+      formErrors.confirmPassword = 'Passwords do not match';
+      isValid = false;
     }
-    
-    // Company name validation (optional)
-    
-    // Terms validation
+
     if (!formData.agreeTerms) {
-      newErrors.agreeTerms = 'You must agree to the terms and conditions';
+      formErrors.agreeTerms = 'You must agree to the terms and conditions';
+      isValid = false;
     }
-    
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
+
+    setErrors(formErrors);
+    return isValid;
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setSignupError('');
     
-    if (validateForm()) {
-      setIsLoading(true);
+    if (!validateForm()) {
+      return;
+    }
+
+    setIsLoading(true);
+    
+    try {
+      // Simulate API call with timeout
+      await new Promise(resolve => setTimeout(resolve, 1500));
       
-      try {
-        // Simulate API call
-        await new Promise(resolve => setTimeout(resolve, 1500));
-        
-        // Successful signup
-        localStorage.setItem('isLoggedIn', 'true');
-        localStorage.setItem('userData', JSON.stringify({
-          firstName: formData.firstName,
-          lastName: formData.lastName,
-          email: formData.email,
-          company: formData.companyName
-        }));
-        
-        // Redirect to subscription selection if it came from pricing
-        const fromPricing = new URLSearchParams(window.location.search).get('from') === 'pricing';
-        if (fromPricing) {
-          navigate('/subscription');
-        } else {
-          navigate('/dashboard');
-        }
-      } catch (error) {
-        console.error('Signup error:', error);
-        setErrors({
-          general: 'An error occurred during sign up. Please try again.'
-        });
-      } finally {
-        setIsLoading(false);
-      }
+      // In a real app, you would register the user with your backend
+      localStorage.setItem('isLoggedIn', 'true');
+      
+      // Navigate to dashboard after successful signup
+      navigate('/dashboard');
+    } catch (err) {
+      setSignupError('An error occurred during sign up. Please try again.');
+    } finally {
+      setIsLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen flex flex-col bg-gray-50 dark:bg-gray-900">
-      <Navbar />
-      <div className="flex-grow flex items-center justify-center px-4 py-12">
-        <div className="w-full max-w-xl">
-          <div className="bg-white dark:bg-gray-800 shadow-lg rounded-lg p-8">
-            <div className="text-center mb-8">
-              <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Create your account</h1>
-              <p className="text-gray-600 dark:text-gray-400 mt-2">Start your 14-day free trial. No credit card required.</p>
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-white dark:from-gray-900 dark:to-gray-800 flex flex-col items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
+      <div className="absolute top-0 left-0 w-full h-full bg-pattern opacity-5 dark:opacity-10 z-0 pointer-events-none"></div>
+      
+      {/* Decorative elements */}
+      <div className="absolute top-20 right-20 w-72 h-72 bg-primary opacity-10 dark:opacity-5 rounded-full filter blur-3xl"></div>
+      <div className="absolute bottom-20 left-20 w-72 h-72 bg-indigo-400 opacity-10 dark:opacity-5 rounded-full filter blur-3xl"></div>
+      
+      <div className="absolute top-4 right-4 z-10">
+        <DarkModeToggle />
+      </div>
+      
+      <div className="w-full max-w-lg z-10">
+        <div className="relative group">
+          <motion.div 
+            className="absolute -inset-0.5 bg-gradient-to-r from-primary to-indigo-600 rounded-lg blur opacity-25 dark:opacity-50 group-hover:opacity-70 transition duration-1000 group-hover:duration-300"
+            animate={{ 
+              backgroundPosition: ['0% 50%', '100% 50%', '0% 50%'] 
+            }}
+            transition={{ 
+              duration: 7, 
+              repeat: Infinity, 
+              repeatType: "reverse" 
+            }}
+          ></motion.div>
+          <div className="relative px-6 pt-8 pb-10 bg-white dark:bg-gray-800 rounded-lg shadow-xl border border-gray-200 dark:border-gray-700">
+            <div className="mx-auto text-center mb-10">
+              <Link to="/" className="inline-block text-center">
+                <h2 className="text-3xl font-extrabold bg-clip-text text-transparent bg-gradient-to-r from-primary via-indigo-600 to-primary-dark">
+                  SaaSPro
+                </h2>
+              </Link>
+              <h2 className="mt-6 text-3xl font-bold text-gray-900 dark:text-white">
+                Create an account
+              </h2>
+              <p className="mt-2 text-sm text-gray-600 dark:text-gray-400">
+                Sign up to get started with SaaSPro
+              </p>
             </div>
             
-            {errors.general && (
-              <div className="mb-6 p-4 bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-900 rounded-md">
-                <p className="text-sm text-red-600 dark:text-red-400">{errors.general}</p>
-              </div>
+            {signupError && (
+              <motion.div
+                initial={{ opacity: 0, y: -10 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="mb-6 p-3 rounded-md bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-900"
+              >
+                <p className="text-sm text-red-600 dark:text-red-400">{signupError}</p>
+              </motion.div>
             )}
             
-            <form onSubmit={handleSubmit}>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-                <div>
-                  <label htmlFor="firstName" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                    First name
-                  </label>
-                  <input
-                    type="text"
-                    id="firstName"
-                    name="firstName"
-                    value={formData.firstName}
-                    onChange={handleChange}
-                    className={`w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 ${
-                      errors.firstName ? 'border-red-500 focus:ring-red-500' : 'border-gray-300 dark:border-gray-600 focus:ring-primary'
-                    } bg-white dark:bg-gray-700 text-gray-900 dark:text-white`}
-                    placeholder="John"
-                    disabled={isLoading}
-                  />
-                  {errors.firstName && <p className="mt-1 text-sm text-red-600 dark:text-red-400">{errors.firstName}</p>}
-                </div>
-                
-                <div>
-                  <label htmlFor="lastName" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                    Last name
-                  </label>
-                  <input
-                    type="text"
-                    id="lastName"
-                    name="lastName"
-                    value={formData.lastName}
-                    onChange={handleChange}
-                    className={`w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 ${
-                      errors.lastName ? 'border-red-500 focus:ring-red-500' : 'border-gray-300 dark:border-gray-600 focus:ring-primary'
-                    } bg-white dark:bg-gray-700 text-gray-900 dark:text-white`}
-                    placeholder="Doe"
-                    disabled={isLoading}
-                  />
-                  {errors.lastName && <p className="mt-1 text-sm text-red-600 dark:text-red-400">{errors.lastName}</p>}
-                </div>
+            <form className="space-y-6" onSubmit={handleSubmit}>
+              <div>
+                <label htmlFor="fullName" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  Full name
+                </label>
+                <input
+                  type="text"
+                  id="fullName"
+                  name="fullName"
+                  value={formData.fullName}
+                  onChange={handleChange}
+                  className={`w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 ${
+                    errors.fullName ? 'border-red-500 focus:ring-red-500' : 'border-gray-300 dark:border-gray-600 focus:ring-primary'
+                  } bg-white dark:bg-gray-700 text-gray-900 dark:text-white`}
+                  placeholder="John Doe"
+                  disabled={isLoading}
+                />
+                {errors.fullName && <p className="mt-1 text-sm text-red-600 dark:text-red-400">{errors.fullName}</p>}
               </div>
               
-              <div className="mb-6">
+              <div>
                 <label htmlFor="email" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                   Work email
                 </label>
@@ -190,7 +187,7 @@ const SignupPage = () => {
                 {errors.email && <p className="mt-1 text-sm text-red-600 dark:text-red-400">{errors.email}</p>}
               </div>
               
-              <div className="mb-6">
+              <div>
                 <label htmlFor="password" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                   Password
                 </label>
@@ -209,7 +206,7 @@ const SignupPage = () => {
                 {errors.password && <p className="mt-1 text-sm text-red-600 dark:text-red-400">{errors.password}</p>}
               </div>
               
-              <div className="mb-6">
+              <div>
                 <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                   Confirm password
                 </label>
@@ -228,7 +225,7 @@ const SignupPage = () => {
                 {errors.confirmPassword && <p className="mt-1 text-sm text-red-600 dark:text-red-400">{errors.confirmPassword}</p>}
               </div>
               
-              <div className="mb-6">
+              <div>
                 <label htmlFor="companyName" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                   Company name <span className="text-gray-500">(optional)</span>
                 </label>
@@ -244,7 +241,7 @@ const SignupPage = () => {
                 />
               </div>
               
-              <div className="mb-8">
+              <div>
                 <div className="flex items-start">
                   <div className="flex items-center h-5">
                     <input
@@ -304,8 +301,13 @@ const SignupPage = () => {
             </div>
           </div>
         </div>
+        
+        <div className="mt-8 text-center">
+          <Link to="/" className="text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100">
+            ← Back to home
+          </Link>
+        </div>
       </div>
-      <Footer />
     </div>
   );
 };
