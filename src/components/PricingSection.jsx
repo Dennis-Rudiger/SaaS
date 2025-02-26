@@ -7,90 +7,94 @@ const PricingSection = () => {
   const plans = [
     {
       name: 'Starter',
-      description: 'Perfect for small teams or individuals just getting started.',
+      description: 'Perfect for individuals and small teams',
       monthlyPrice: 29,
-      annualPrice: 290, // 2 months free
+      annualPrice: 290,
       features: [
         'Up to 5 team members',
-        '5GB storage',
-        'Basic analytics',
+        '5 GB storage',
+        'Basic project management',
+        'Task tracking',
         'Email support',
-        'API access',
       ],
-      highlightFeature: false,
-      cta: 'Get Started',
-      popular: false,
+      isPopular: false,
+      cta: 'Start Free Trial',
+      ctaLink: '/signup?plan=starter'
     },
     {
       name: 'Professional',
-      description: 'Ideal for growing businesses that need more power and features.',
-      monthlyPrice: 99,
-      annualPrice: 990, // 2 months free
+      description: 'Ideal for growing teams and businesses',
+      monthlyPrice: 79,
+      annualPrice: 790,
       features: [
         'Up to 20 team members',
-        '50GB storage',
+        '20 GB storage',
+        'Advanced project management',
+        'Time tracking',
+        'Resource allocation',
         'Advanced analytics',
         'Priority email support',
-        'API access',
-        'Custom integrations',
-        'Team collaboration tools',
       ],
-      highlightFeature: 'Team collaboration tools',
+      isPopular: true,
       cta: 'Start Free Trial',
-      popular: true,
+      ctaLink: '/signup?plan=professional'
     },
     {
       name: 'Enterprise',
-      description: 'Advanced features and support for large organizations.',
-      monthlyPrice: 299,
-      annualPrice: 2990, // 2 months free
+      description: 'For large organizations with complex needs',
+      monthlyPrice: 199,
+      annualPrice: 1990,
       features: [
         'Unlimited team members',
-        '500GB storage',
-        'Custom reporting',
-        '24/7 phone support',
+        '100 GB storage',
+        'Advanced project management',
+        'Time tracking',
+        'Resource allocation',
+        'Custom analytics',
         'Dedicated account manager',
-        'Advanced security',
-        'Custom training',
-        'SLA guarantees',
+        'Phone and email support',
+        'Single sign-on (SSO)',
+        'Custom integrations',
       ],
-      highlightFeature: '24/7 phone support',
+      isPopular: false,
       cta: 'Contact Sales',
-      popular: false,
-    },
+      ctaLink: '/contact'
+    }
   ];
 
   return (
-    <section className="py-20 bg-white dark:bg-gray-900" id="pricing">
-      <div className="container mx-auto px-4 md:px-6">
+    <section id="pricing" className="py-20 bg-white dark:bg-gray-900">
+      <div className="container mx-auto px-4">
         <div className="text-center mb-16">
-          <h2 className="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-4">Simple, Transparent Pricing</h2>
-          <p className="text-xl text-gray-600 dark:text-gray-400 max-w-3xl mx-auto">
-            Choose the plan that's right for your business. All plans include a 14-day free trial.
+          <h2 className="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-4">
+            Simple, Transparent Pricing
+          </h2>
+          <p className="text-xl text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
+            Choose the plan that suits your needs. All plans include a 14-day free trial.
           </p>
           
-          <div className="mt-10 inline-flex items-center bg-gray-100 dark:bg-gray-800 p-1 rounded-lg">
-            <button
-              onClick={() => setIsAnnual(true)}
-              className={`px-6 py-2.5 rounded-md text-sm font-medium transition ${
-                isAnnual 
-                  ? 'bg-white dark:bg-gray-700 shadow text-gray-900 dark:text-white' 
-                  : 'text-gray-700 dark:text-gray-400'
-              }`}
-            >
-              Annual
-              <span className="ml-2 text-xs font-semibold text-green-600 dark:text-green-400">Save 20%</span>
-            </button>
-            <button
-              onClick={() => setIsAnnual(false)}
-              className={`px-6 py-2.5 rounded-md text-sm font-medium transition ${
-                !isAnnual 
-                  ? 'bg-white dark:bg-gray-700 shadow text-gray-900 dark:text-white' 
-                  : 'text-gray-700 dark:text-gray-400'
-              }`}
-            >
+          <div className="mt-8 flex items-center justify-center">
+            <span className={`text-sm ${isAnnual ? 'text-gray-600 dark:text-gray-400' : 'text-gray-900 dark:text-white font-medium'}`}>
               Monthly
+            </span>
+            <button
+              className="mx-4 relative inline-flex items-center h-6 rounded-full w-11 bg-primary transition-colors"
+              onClick={() => setIsAnnual(!isAnnual)}
+              aria-pressed={isAnnual}
+              aria-labelledby="billing-cycle"
+            >
+              <span className="sr-only" id="billing-cycle">
+                {isAnnual ? 'Switch to monthly billing' : 'Switch to annual billing'}
+              </span>
+              <span
+                className={`inline-block w-4 h-4 transform bg-white rounded-full transition-transform ${
+                  isAnnual ? 'translate-x-6' : 'translate-x-1'
+                }`}
+              />
             </button>
+            <span className={`text-sm ${isAnnual ? 'text-gray-900 dark:text-white font-medium' : 'text-gray-600 dark:text-gray-400'}`}>
+              Annual
+            </span>
           </div>
         </div>
         
@@ -99,12 +103,12 @@ const PricingSection = () => {
             <div
               key={plan.name}
               className={`bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-8 border transition-transform hover:scale-105 ${
-                plan.popular 
+                plan.isPopular 
                   ? 'border-primary ring-1 ring-primary relative overflow-hidden' 
                   : 'border-gray-200 dark:border-gray-700'
               }`}
             >
-              {plan.popular && (
+              {plan.isPopular && (
                 <div className="absolute top-0 right-0">
                   <div className="bg-primary text-white text-xs font-bold px-3 py-1 transform rotate-45 translate-x-2 -translate-y-1">
                     Popular
@@ -156,9 +160,9 @@ const PricingSection = () => {
               </ul>
               
               <Link
-                to={plan.name === 'Enterprise' ? '/contact' : '/signup'}
+                to={plan.ctaLink}
                 className={`block w-full py-3 px-4 rounded-md text-center font-medium ${
-                  plan.popular
+                  plan.isPopular
                     ? 'bg-primary text-white hover:bg-primary-dark'
                     : 'bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-white hover:bg-gray-200 dark:hover:bg-gray-600'
                 } transition`}

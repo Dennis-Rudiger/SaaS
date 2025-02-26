@@ -1,7 +1,7 @@
 /**
  * Validates email format
- * @param {string} email - The email address to validate
- * @returns {boolean} - True if the email format is valid
+ * @param {string} email - Email to validate
+ * @returns {boolean} - Whether the email is valid
  */
 export const validateEmail = (email) => {
   const re = /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
@@ -10,13 +10,54 @@ export const validateEmail = (email) => {
 
 /**
  * Validates password strength
- * @param {string} password - The password to validate
- * @returns {boolean} - True if the password meets strength requirements
+ * @param {string} password - Password to validate
+ * @returns {Object} - Object containing the validation result and message
  */
 export const validatePassword = (password) => {
-  // At least 8 characters, 1 uppercase letter, 1 lowercase letter, and 1 number
-  const re = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/;
-  return re.test(password);
+  // Password must be at least 8 characters
+  if (password.length < 8) {
+    return {
+      isValid: false,
+      message: 'Password must be at least 8 characters long',
+    };
+  }
+
+  // Password must contain at least one uppercase letter
+  if (!/[A-Z]/.test(password)) {
+    return {
+      isValid: false,
+      message: 'Password must contain at least one uppercase letter',
+    };
+  }
+
+  // Password must contain at least one lowercase letter
+  if (!/[a-z]/.test(password)) {
+    return {
+      isValid: false,
+      message: 'Password must contain at least one lowercase letter',
+    };
+  }
+
+  // Password must contain at least one number
+  if (!/[0-9]/.test(password)) {
+    return {
+      isValid: false,
+      message: 'Password must contain at least one number',
+    };
+  }
+
+  // Password must contain at least one special character
+  if (!/[!@#$%^&*(),.?":{}|<>]/.test(password)) {
+    return {
+      isValid: false,
+      message: 'Password must contain at least one special character',
+    };
+  }
+
+  return {
+    isValid: true,
+    message: 'Password is strong',
+  };
 };
 
 /**
@@ -35,13 +76,12 @@ export const validateURL = (url) => {
 
 /**
  * Validates phone number format
- * @param {string} phone - The phone number to validate
- * @returns {boolean} - True if the phone number format is valid
+ * @param {string} phone - Phone number to validate
+ * @returns {boolean} - Whether the phone number is valid
  */
 export const validatePhone = (phone) => {
-  // Basic phone validation - adjust as needed for your requirements
-  const re = /^\+?[0-9]{10,15}$/;
-  return re.test(phone.replace(/[\s()\-]/g, ''));
+  const re = /^[\+]?[(]?[0-9]{3}[)]?[-\s\.]?[0-9]{3}[-\s\.]?[0-9]{4,6}$/;
+  return re.test(String(phone));
 };
 
 /**
@@ -50,7 +90,7 @@ export const validatePhone = (phone) => {
  * @returns {boolean} - True if the string is not empty
  */
 export const isNotEmpty = (value) => {
-  return value.trim().length > 0;
+  return value !== undefined && value !== null && value.trim() !== '';
 };
 
 /**
@@ -117,8 +157,8 @@ export const validateForm = (formData, validationRules) => {
       return;
     }
     
-    if (rules.password && value && !validatePassword(value)) {
-      errors[field] = rules.passwordMessage || 'Password must be at least 8 characters, with uppercase, lowercase and number';
+    if (rules.password && value && !validatePassword(value).isValid) {
+      errors[field] = rules.passwordMessage || validatePassword(value).message;
       return;
     }
     
@@ -144,4 +184,39 @@ export const validateForm = (formData, validationRules) => {
   });
   
   return errors;
+};
+
+/**
+ * Validates a form field based on its type
+ * @param {string} type - Type of validation to perform
+ * @param {any} value - Value to validate
+ * @returns {Object} - Object containing the validation result and message
+ */
+export const validateField = (type, value) => {
+  switch (type) {
+    case 'email':
+      return {
+        isValid: validateEmail(value),
+        message: validateEmail(value) ? '' : 'Please enter a valid email address',
+      };
+    case 'password':
+      return validatePassword(value);
+    case 'required':
+      return {
+        isValid: isNotEmpty(value),
+        message: isNotEmpty(value) ? '' : 'This field is required',
+      };
+    case 'phone':
+      return {
+        isValid: validatePhone(value),
+        message: validatePhone(value) ? '' : 'Please enter a valid phone number',
+      };
+    case 'url':
+      return {
+        isValid: validateURL(value),
+        message: validateURL(value) ? '' : 'Please enter a valid URL',
+      };
+    default:
+      return { isValid: true, message: '' };
+  }
 };

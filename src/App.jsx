@@ -9,6 +9,8 @@ import LoginPage from './pages/LoginPage';
 import SignupPage from './pages/SignupPage';
 import SubscriptionPage from './pages/SubscriptionPage';
 import DashboardPage from './pages/DashboardPage';
+import SettingsPage from './pages/SettingsPage';
+import BillingPage from './pages/BillingPage';
 import NotFoundPage from './pages/NotFoundPage';
 
 function App() {
@@ -35,13 +37,14 @@ function App() {
         <Route path="/login" element={<LoginPage />} />
         <Route path="/signup" element={<SignupPage />} />
         <Route path="/subscription" element={<SubscriptionPage />} />
-        <Route path="/dashboard" element={<DashboardPage />} />
         
-        {/* Add more dashboard routes */}
+        {/* Dashboard routes */}
+        <Route path="/dashboard" element={<DashboardPage />} />
+        <Route path="/settings" element={<SettingsPage />} />
+        <Route path="/billing" element={<BillingPage />} />
         <Route path="/projects" element={<DashboardPage />} />
         <Route path="/tasks" element={<DashboardPage />} />
         <Route path="/calendar" element={<DashboardPage />} />
-        <Route path="/settings" element={<DashboardPage />} />
         
         {/* 404 Page */}
         <Route path="*" element={<NotFoundPage />} />

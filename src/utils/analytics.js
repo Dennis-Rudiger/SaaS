@@ -1,42 +1,98 @@
 /**
- * Example analytics utility for SaaS landing page
- * Replace this with your preferred analytics solution (Google Analytics, Segment, etc.)
+ * Analytics utility functions
+ * In a real application, this would integrate with services like Google Analytics,
+ * Mixpanel, Segment, etc.
  */
 
-// Initialize analytics
-export const initAnalytics = () => {
-  console.log('Analytics initialized');
+// Flag to track if analytics has been initialized
+let initialized = false;
+
+/**
+ * Initialize analytics tracking
+ * @param {Object} options - Configuration options
+ */
+export const initAnalytics = (options = {}) => {
+  if (initialized) return;
   
-  // Track page views
-  trackPageView();
+  console.log('Analytics initialized with options:', options);
   
-  // Listen for route changes if using a SPA
-  window.addEventListener('popstate', () => {
-    trackPageView();
-  });
+  // This would normally be where you'd initialize your analytics SDK
+  // For example:
+  // if (process.env.NODE_ENV === 'production') {
+  //   GoogleAnalytics.initialize(process.env.REACT_APP_GA_TRACKING_ID);
+  //   Mixpanel.initialize(process.env.REACT_APP_MIXPANEL_TOKEN);
+  // }
+  
+  initialized = true;
 };
 
-// Track page views
-export const trackPageView = () => {
-  const page = window.location.pathname;
-  console.log(`Page view tracked: ${page}`);
+/**
+ * Track a page view
+ * @param {string} pageName - Name of the page
+ * @param {Object} properties - Additional properties to track
+ */
+export const trackPageView = (pageName, properties = {}) => {
+  if (!initialized) {
+    console.warn('Analytics not initialized. Call initAnalytics() first.');
+    return;
+  }
   
-  // Implementation for real analytics service
-  // Example: gtag('config', 'UA-XXXXXXXX-X', { 'page_path': page });
+  console.log(`Page viewed: ${pageName}`, properties);
+  
+  // In a real application:
+  // GoogleAnalytics.pageview(pageName);
+  // Mixpanel.track('Page Viewed', { page_name: pageName, ...properties });
 };
 
-// Track events
-export const trackEvent = (category, action, label = null, value = null) => {
-  console.log(`Event tracked: ${category} - ${action} ${label ? `- ${label}` : ''} ${value ? `- ${value}` : ''}`);
+/**
+ * Track an event
+ * @param {string} eventName - Name of the event
+ * @param {Object} properties - Properties associated with the event
+ */
+export const trackEvent = (eventName, properties = {}) => {
+  if (!initialized) {
+    console.warn('Analytics not initialized. Call initAnalytics() first.');
+    return;
+  }
   
-  // Implementation for real analytics service
-  // Example: gtag('event', action, { 'event_category': category, 'event_label': label, 'value': value });
+  console.log(`Event tracked: ${eventName}`, properties);
+  
+  // In a real application:
+  // GoogleAnalytics.event({ category: properties.category || 'General', action: eventName, label: properties.label });
+  // Mixpanel.track(eventName, properties);
 };
 
-// Track user conversion
-export const trackConversion = (conversionType, value = 0) => {
-  console.log(`Conversion tracked: ${conversionType} - Value: ${value}`);
+/**
+ * Identify a user
+ * @param {string} userId - Unique identifier for the user
+ * @param {Object} traits - User properties/traits
+ */
+export const identifyUser = (userId, traits = {}) => {
+  if (!initialized) {
+    console.warn('Analytics not initialized. Call initAnalytics() first.');
+    return;
+  }
   
-  // Implementation for real analytics service
-  // Example: gtag('event', 'conversion', { 'send_to': 'AW-CONVERSION_ID/CONVERSION_LABEL', 'value': value });
+  console.log(`User identified: ${userId}`, traits);
+  
+  // In a real application:
+  // Mixpanel.identify(userId);
+  // Mixpanel.people.set(traits);
+};
+
+/**
+ * Track a conversion
+ * @param {string} conversionName - Name of the conversion
+ * @param {Object} properties - Properties associated with the conversion
+ */
+export const trackConversion = (conversionName, properties = {}) => {
+  if (!initialized) {
+    console.warn('Analytics not initialized. Call initAnalytics() first.');
+    return;
+  }
+  
+  console.log(`Conversion tracked: ${conversionName}`, properties);
+  
+  // Special tracking for conversions, which might trigger in multiple analytics systems
+  trackEvent(conversionName, { ...properties, isConversion: true });
 };

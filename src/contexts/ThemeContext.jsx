@@ -1,78 +1,65 @@
-import React, { createContext, useState, useEffect, useContext } from 'react';
+import React, { createContext, useState, useContext, useEffect } from 'react';
 
 const ThemeContext = createContext();
 
-export const ThemeProvider = ({ children }) => {
-  const [isDarkMode, setIsDarkMode] = useState(false);
+export const useTheme = () => useContext(ThemeContext);
 
+export const ThemeProvider = ({ children }) => {
+  // Check if user has a theme preference in localStorage
+  const savedTheme = localStorage.getItem('theme');
+  const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+  
+  // Set initial state based on preference or system setting
+  const [isDarkMode, setIsDarkMode] = useState(
+    savedTheme ? savedTheme === 'dark' : prefersDark
+  );
+
+  // Update localStorage and HTML class when theme changes
   useEffect(() => {
-    // Check for saved theme preference or use system preference
-    const savedTheme = localStorage.getItem('theme');
-    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    localStorage.setItem('theme', isDarkMode ? 'dark' : 'light');
     
-    if (savedTheme === 'dark' || (!savedTheme && prefersDark)) {
-      setIsDarkMode(true);
+    if (isDarkMode) {
       document.documentElement.classList.add('dark');
     } else {
-      setIsDarkMode(false);
       document.documentElement.classList.remove('dark');
     }
-    
-    // Listen for OS theme changes
+  }, [isDarkMode]);
+
+  // Listen for system theme changes
+  useEffect(() => {
     const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
-    const handleChange = (e) => {
+    
+    const handleChange = () => {
+      // Only change theme automatically if user hasn't set a preference
       if (!localStorage.getItem('theme')) {
-        setIsDarkMode(e.matches);
-        if (e.matches) {
-          document.documentElement.classList.add('dark');
-        } else {
-          document.documentElement.classList.remove('dark');
-        }
+        setIsDarkMode(mediaQuery.matches);
       }
     };
     
-    // Add event listener with compatibility for older browsers
+    // Modern browsers
     if (mediaQuery.addEventListener) {
       mediaQuery.addEventListener('change', handleChange);
-    } else {
-      // For older browsers
+      return () => mediaQuery.removeEventListener('change', handleChange);
+    } 
+    // Older browsers
+    else if (mediaQuery.addListener) {
       mediaQuery.addListener(handleChange);
+      return () => mediaQuery.removeListener(handleChange);
     }
-    
-    return () => {
-      if (mediaQuery.removeEventListener) {
-        mediaQuery.removeEventListener('change', handleChange);
-      } else {
-        // For older browsers
-        mediaQuery.removeListener(handleChange);
-      }
-    };
   }, []);
 
-  const toggleDarkMode = () => {
-    if (isDarkMode) {
-      document.documentElement.classList.remove('dark');
-      localStorage.setItem('theme', 'light');
-    } else {
-      document.documentElement.classList.add('dark');
-      localStorage.setItem('theme', 'dark');
-    }
+  const toggleTheme = () => {
     setIsDarkMode(!isDarkMode);
   };
 
+  const value = {
+    isDarkMode,
+    toggleTheme
+  };
+
   return (
-    <ThemeContext.Provider value={{ isDarkMode, toggleDarkMode }}>
+    <ThemeContext.Provider value={value}>
       {children}
     </ThemeContext.Provider>
   );
 };
-
-export const useTheme = () => {
-  const context = useContext(ThemeContext);
-  if (context === undefined) {
-    throw new Error('useTheme must be used within a ThemeProvider');
-  }
-  return context;
-};
-
-export default ThemeContext;

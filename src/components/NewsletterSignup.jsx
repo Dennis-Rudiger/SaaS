@@ -1,94 +1,98 @@
 import React, { useState } from 'react';
+import { validateEmail } from '../utils/formValidation';
 
 const NewsletterSignup = () => {
   const [email, setEmail] = useState('');
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [status, setStatus] = useState(null); // null, 'success', 'error'
-  const [errorMessage, setErrorMessage] = useState('');
+  const [status, setStatus] = useState(null);
+  const [loading, setLoading] = useState(false);
 
-  const validateEmail = (email) => {
-    const re = /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
-    return re.test(String(email).toLowerCase());
-  };
-
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     
-    // Reset status
-    setStatus(null);
-    setErrorMessage('');
-    
     // Validate email
-    if (!email) {
-      setStatus('error');
-      setErrorMessage('Email is required');
-      return;
-    }
-    
     if (!validateEmail(email)) {
-      setStatus('error');
-      setErrorMessage('Please enter a valid email address');
+      setStatus({
+        success: false,
+        message: 'Please enter a valid email address.'
+      });
       return;
     }
     
-    // Form is valid, proceed with submission
-    setIsSubmitting(true);
+    setLoading(true);
+    setStatus(null);
     
-    // Simulate API call
-    setTimeout(() => {
-      setIsSubmitting(false);
-      setStatus('success');
-      setEmail('');
+    try {
+      // Simulate API call
+      await new Promise(resolve => setTimeout(resolve, 1500));
       
-      // Reset success message after 5 seconds
-      setTimeout(() => {
-        setStatus(null);
-      }, 5000);
-    }, 1500);
+      // In a real app, you would submit to an API endpoint here
+      // const response = await fetch('/api/newsletter/subscribe', {
+      //   method: 'POST',
+      //   headers: {
+      //     'Content-Type': 'application/json',
+      //   },
+      //   body: JSON.stringify({ email }),
+      // });
+      
+      // if (!response.ok) {
+      //   throw new Error('Subscription failed');
+      // }
+      
+      // Success
+      setStatus({
+        success: true,
+        message: 'Thank you for subscribing!'
+      });
+      setEmail('');
+    } catch (error) {
+      setStatus({
+        success: false,
+        message: 'Something went wrong. Please try again.'
+      });
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
-    <div className="w-full max-w-md mx-auto">
-      <form onSubmit={handleSubmit} className="relative">
-        <input
-          type="email"
-          placeholder="Enter your email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          className={`w-full px-4 py-3 rounded-lg pr-24 border ${
-            status === 'error'
-              ? 'border-red-500 focus:ring-red-500 focus:border-red-500'
-              : 'border-gray-300 dark:border-gray-600 focus:ring-primary focus:border-primary'
-          } bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:outline-none focus:ring-2`}
-          disabled={isSubmitting}
-        />
-        <button
-          type="submit"
-          disabled={isSubmitting}
-          className={`absolute right-1 top-1 bottom-1 px-4 rounded-md bg-primary text-white font-medium hover:bg-primary-dark transition ${
-            isSubmitting ? 'opacity-70 cursor-not-allowed' : ''
-          }`}
-        >
-          {isSubmitting ? (
-            <svg className="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-            </svg>
-          ) : (
-            'Subscribe'
-          )}
-        </button>
+    <div>
+      <form onSubmit={handleSubmit} className="sm:flex">
+        <div className="min-w-0 flex-1">
+          <label htmlFor="email-address" className="sr-only">Email address</label>
+          <input
+            id="email-address"
+            type="email"
+            autoComplete="email"
+            required
+            className="block w-full px-4 py-2 text-base text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 border border-gray-300 dark:border-gray-600 rounded-md dark:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary"
+            placeholder="Enter your email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            disabled={loading}
+          />
+        </div>
+        <div className="mt-3 sm:mt-0 sm:ml-3">
+          <button
+            type="submit"
+            disabled={loading}
+            className={`block w-full px-4 py-2 rounded-md text-white ${
+              loading ? 'bg-primary-light cursor-not-allowed' : 'bg-primary hover:bg-primary-dark'
+            } font-medium focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary`}
+          >
+            {loading ? 'Subscribing...' : 'Subscribe'}
+          </button>
+        </div>
       </form>
       
-      {status === 'error' && (
-        <p className="mt-2 text-sm text-red-600 dark:text-red-400">{errorMessage}</p>
+      {status && (
+        <div className={`mt-3 text-sm ${status.success ? 'text-green-600' : 'text-red-600'}`}>
+          {status.message}
+        </div>
       )}
       
-      {status === 'success' && (
-        <p className="mt-2 text-sm text-green-600 dark:text-green-400">
-          Thank you for subscribing! Check your email for confirmation.
-        </p>
-      )}
+      <p className="mt-3 text-xs text-gray-500 dark:text-gray-400">
+        By subscribing, you agree to our Privacy Policy and consent to receive updates from our company.
+      </p>
     </div>
   );
 };
