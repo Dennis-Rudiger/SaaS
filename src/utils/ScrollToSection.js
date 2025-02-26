@@ -1,30 +1,30 @@
-/**
- * Smoothly scrolls to a section by ID with an offset for fixed headers
- * @param {string} sectionId - The ID of the section to scroll to
- * @param {number} offset - The offset from the top (default: 80px for header)
- */
-export const scrollToSection = (sectionId, offset = 80) => {
-  const section = document.getElementById(sectionId);
+// Utility function to scroll to a specific section by ID
+export const scrollToSection = (sectionId) => {
+  const element = document.getElementById(sectionId);
   
-  if (section) {
-    const yCoordinate = section.getBoundingClientRect().top + window.pageYOffset;
-    const yOffset = -offset;
+  if (element) {
+    // Get the height of the sticky header (if any)
+    const header = document.querySelector('header');
+    const offset = header ? header.offsetHeight : 0;
+    
+    // Calculate position with offset
+    const bodyRect = document.body.getBoundingClientRect().top;
+    const elementRect = element.getBoundingClientRect().top;
+    const elementPosition = elementRect - bodyRect;
+    const offsetPosition = elementPosition - offset - 20; // Extra 20px for breathing room
     
     window.scrollTo({
-      top: yCoordinate + yOffset,
+      top: offsetPosition,
       behavior: 'smooth'
     });
   }
 };
 
-/**
- * Scrolls to the top of the page
- * @param {boolean} smooth - Whether to scroll smoothly or jump
- */
-export const scrollToTop = (smooth = true) => {
+// Utility function to scroll to the top of the page
+export const scrollToTop = () => {
   window.scrollTo({
     top: 0,
-    behavior: smooth ? 'smooth' : 'auto'
+    behavior: 'smooth'
   });
 };
 

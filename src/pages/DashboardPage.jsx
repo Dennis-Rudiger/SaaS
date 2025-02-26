@@ -1,12 +1,17 @@
-import React from 'react';
+import React, { useState } from 'react';
+import { motion } from 'framer-motion';
 import DashboardLayout from '../layouts/DashboardLayout';
 import StatCard from '../components/dashboard/StatCard';
 import TasksList from '../components/dashboard/TasksList';
 import ActivityFeed from '../components/dashboard/ActivityFeed';
 import QuickActions from '../components/dashboard/QuickActions';
 import UpcomingEvents from '../components/dashboard/UpcomingEvents';
+import RecentProjects from '../components/dashboard/RecentProjects';
+import DashboardMetrics from '../components/dashboard/DashboardMetrics';
 
 const DashboardPage = () => {
+  const [period, setPeriod] = useState('week');
+  
   const stats = [
     {
       id: 1,
@@ -62,13 +67,53 @@ const DashboardPage = () => {
     },
   ];
 
+  // Animation variants
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: { 
+      opacity: 1,
+      transition: { 
+        staggerChildren: 0.1
+      }
+    }
+  };
+  
+  const itemVariants = {
+    hidden: { y: 20, opacity: 0 },
+    visible: { y: 0, opacity: 1 }
+  };
+
   return (
     <DashboardLayout>
       <div className="py-6">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 md:px-8">
           <div className="flex flex-col md:flex-row md:items-center md:justify-between">
-            <h1 className="text-2xl font-semibold text-gray-900 dark:text-white">Dashboard</h1>
-            <div className="mt-4 md:mt-0">
+            <motion.h1 
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.5 }}
+              className="text-2xl font-semibold text-gray-900 dark:text-white"
+            >
+              Dashboard
+            </motion.h1>
+            
+            <div className="mt-4 md:mt-0 flex space-x-3">
+              <div className="inline-flex bg-gray-100 dark:bg-gray-800 rounded-md p-1">
+                {['day', 'week', 'month'].map((view) => (
+                  <button
+                    key={view}
+                    onClick={() => setPeriod(view)}
+                    className={`px-3 py-1.5 text-sm font-medium rounded-md ${
+                      period === view
+                        ? 'bg-white dark:bg-gray-700 text-gray-800 dark:text-white shadow'
+                        : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'
+                    }`}
+                  >
+                    {view.charAt(0).toUpperCase() + view.slice(1)}
+                  </button>
+                ))}
+              </div>
+              
               <button className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-primary hover:bg-primary-dark focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary">
                 <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
@@ -80,39 +125,54 @@ const DashboardPage = () => {
         </div>
 
         <div className="max-w-7xl mx-auto px-4 sm:px-6 md:px-8">
-          {/* Stats */}
-          <div className="mt-8">
-            <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
-              {stats.map((stat) => (
-                <StatCard
-                  key={stat.id}
-                  title={stat.title}
-                  value={stat.value}
-                  icon={stat.icon}
-                  color={stat.color}
-                  change={stat.change}
-                  positive={stat.positive}
-                />
-              ))}
-            </div>
-          </div>
+          {/* Stats row */}
+          <motion.div 
+            variants={containerVariants}
+            initial="hidden"
+            animate="visible"
+            className="mt-8"
+          >
+            <DashboardMetrics />
+          </motion.div>
 
           {/* Main Content */}
           <div className="mt-8 grid grid-cols-1 gap-6 lg:grid-cols-3">
-            <div className="lg:col-span-2">
+            <motion.div 
+              variants={itemVariants}
+              initial="hidden"
+              animate="visible"
+              transition={{ delay: 0.2 }}
+              className="lg:col-span-2"
+            >
               <TasksList />
               
               <div className="mt-6">
                 <ActivityFeed />
               </div>
-            </div>
+            </motion.div>
             
-            <div className="space-y-6">
+            <motion.div 
+              variants={itemVariants}
+              initial="hidden"
+              animate="visible"
+              transition={{ delay: 0.4 }}
+              className="space-y-6"
+            >
               <QuickActions />
-              
               <UpcomingEvents />
-            </div>
+            </motion.div>
           </div>
+          
+          {/* Recent Projects Section */}
+          <motion.div 
+            variants={itemVariants}
+            initial="hidden"
+            animate="visible"
+            transition={{ delay: 0.6 }}
+            className="mt-8"
+          >
+            <RecentProjects />
+          </motion.div>
         </div>
       </div>
     </DashboardLayout>

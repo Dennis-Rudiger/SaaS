@@ -4,7 +4,7 @@ import { scrollToSection } from '../utils/ScrollToSection';
 
 const HeroSection = () => {
   return (
-    <section className="relative pt-28 pb-24 bg-gradient-to-br from-white to-gray-100 dark:from-gray-900 dark:to-gray-800 overflow-hidden">
+    <section id="home" className="relative pt-28 pb-24 bg-gradient-to-br from-white to-gray-100 dark:from-gray-900 dark:to-gray-800 overflow-hidden">
       {/* Background pattern - subtle in light mode, more visible in dark */}
       <div className="absolute inset-0 bg-pattern opacity-5 dark:opacity-10"></div>
       

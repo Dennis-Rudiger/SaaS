@@ -1,5 +1,6 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
+import { motion } from 'framer-motion';
 
 const actions = [
   {
@@ -92,8 +93,15 @@ const colorClasses = {
 };
 
 const QuickActions = () => {
+  const [hoveredItem, setHoveredItem] = useState(null);
+
   return (
-    <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md overflow-hidden">
+    <motion.div 
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.5 }}
+      className="bg-white dark:bg-gray-800 rounded-lg shadow-md overflow-hidden"
+    >
       <div className="p-6 border-b border-gray-200 dark:border-gray-700">
         <h2 className="text-xl font-semibold text-gray-800 dark:text-white">
           Quick Actions
@@ -103,30 +111,50 @@ const QuickActions = () => {
         <div className="space-y-4">
           {actions.map((action) => {
             const colorClass = colorClasses[action.color] || colorClasses.blue;
+            const isHovered = hoveredItem === action.id;
             
             return (
-              <Link
+              <motion.div
                 key={action.id}
-                to={action.path}
-                className="flex items-center p-4 rounded-lg border border-gray-200 dark:border-gray-700 hover:shadow-md transition-shadow"
+                onMouseEnter={() => setHoveredItem(action.id)}
+                onMouseLeave={() => setHoveredItem(null)}
+                whileHover={{ scale: 1.02 }}
+                transition={{ type: "spring", stiffness: 300 }}
               >
-                <div className={`p-3 rounded-lg ${colorClass.bgLight} ${colorClass.text} mr-4`}>
-                  {action.icon}
-                </div>
-                <div>
-                  <h3 className="text-base font-medium text-gray-900 dark:text-white">
-                    {action.name}
-                  </h3>
-                  <p className="text-sm text-gray-500 dark:text-gray-400">
-                    {action.description}
-                  </p>
-                </div>
-                <div className="ml-auto">
-                  <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                  </svg>
-                </div>
-              </Link>
+                <Link
+                  to={action.path}
+                  className="flex items-center p-4 rounded-lg border border-gray-200 dark:border-gray-700 hover:shadow-md transition duration-300"
+                >
+                  <motion.div 
+                    className={`p-3 rounded-lg ${colorClass.bgLight} ${colorClass.text} mr-4`}
+                    animate={{ 
+                      scale: isHovered ? [1, 1.1, 1] : 1,
+                    }}
+                    transition={{ duration: 0.5, repeat: isHovered ? Infinity : 0, repeatType: "loop" }}
+                  >
+                    {action.icon}
+                  </motion.div>
+                  <div>
+                    <h3 className="text-base font-medium text-gray-900 dark:text-white">
+                      {action.name}
+                    </h3>
+                    <p className="text-sm text-gray-500 dark:text-gray-400">
+                      {action.description}
+                    </p>
+                  </div>
+                  <motion.div 
+                    className="ml-auto"
+                    animate={{ 
+                      x: isHovered ? [0, 5, 0] : 0,
+                    }}
+                    transition={{ duration: 0.5 }}
+                  >
+                    <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                    </svg>
+                  </motion.div>
+                </Link>
+              </motion.div>
             );
           })}
         </div>
@@ -143,7 +171,7 @@ const QuickActions = () => {
           </Link>
         </div>
       </div>
-    </div>
+    </motion.div>
   );
 };
 

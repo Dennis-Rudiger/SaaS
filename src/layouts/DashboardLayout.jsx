@@ -1,7 +1,10 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import DarkModeToggle from '../components/DarkModeToggle';
-import useOnClickOutside from '../hooks/useOnClickOutside';
+import ProfileDropdown from '../components/dashboard/ProfileDropdown';
+import NotificationsDropdown from '../components/dashboard/NotificationsDropdown';
+import Footer from '../components/dashboard/Footer';
+import { trackPageView } from '../utils/analytics';
 
 const navigation = [
   {
@@ -69,26 +72,11 @@ const navigation = [
   },
 ];
 
-const userNavigation = [
-  { name: 'Your Profile', href: '/settings/profile' },
-  { name: 'Settings', href: '/settings' },
-  { name: 'Billing', href: '/billing' },
-  { name: 'Sign out', href: '/logout' },
-];
-
 const DashboardLayout = ({ children }) => {
   const location = useLocation();
   const navigate = useNavigate();
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-  const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false);
-  const profileMenuRef = useRef();
-  
-  useOnClickOutside(profileMenuRef, () => setIsProfileMenuOpen(false));
-
-  const handleLogout = () => {
-    localStorage.removeItem('isLoggedIn');
-    navigate('/login');
-  };
+  const [searchQuery, setSearchQuery] = useState('');
   
   // Check if user is logged in
   useEffect(() => {
@@ -98,21 +86,47 @@ const DashboardLayout = ({ children }) => {
     }
   }, [location, navigate]);
 
+  // Track page view
+  useEffect(() => {
+    trackPageView(location.pathname);
+  }, [location]);
+
+  const handleSearch = (e) => {
+    e.preventDefault();
+    if (searchQuery.trim()) {
+      // In a real app, you would navigate to a search results page
+      console.log(`Searching for: ${searchQuery}`);
+      // Clear the search input
+      setSearchQuery('');
+    }
+  };
+
   return (
     <div className="flex h-screen bg-gray-100 dark:bg-gray-900">
-      {/* Sidebar for mobile */}
-      <div className={`fixed inset-0 z-40 lg:hidden ${isSidebarOpen ? 'block' : 'hidden'}`} role="dialog" aria-modal="true">
-        <div className="fixed inset-0 bg-gray-600 dark:bg-gray-900 bg-opacity-75 dark:bg-opacity-75" aria-hidden="true" onClick={() => setIsSidebarOpen(false)}></div>
-        
+      {/* Mobile sidebar backdrop */}
+      {isSidebarOpen && (
+        <div 
+          className="fixed inset-0 z-40 bg-gray-600 dark:bg-gray-900 bg-opacity-75 dark:bg-opacity-75 lg:hidden" 
+          aria-hidden="true" 
+          onClick={() => setIsSidebarOpen(false)}
+        ></div>
+      )}
+      
+      {/* Mobile sidebar */}
+      <div 
+        className={`fixed inset-0 z-40 flex lg:hidden transition-all transform ${
+          isSidebarOpen ? 'translate-x-0' : '-translate-x-full'
+        }`}
+      >
         <div className="relative flex-1 flex flex-col max-w-xs w-full bg-white dark:bg-gray-800 h-full">
           <div className="absolute top-0 right-0 -mr-12 pt-2">
             <button
               type="button"
-              className="ml-1 flex items-center justify-center h-10 w-10 rounded-full bg-white dark:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-indigo-500"
+              className="ml-1 flex items-center justify-center h-10 w-10 rounded-full focus:outline-none focus:ring-2 focus:ring-inset focus:ring-white"
               onClick={() => setIsSidebarOpen(false)}
             >
               <span className="sr-only">Close sidebar</span>
-              <svg className="h-6 w-6 text-gray-500 dark:text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+              <svg className="h-6 w-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
               </svg>
             </button>
@@ -120,7 +134,8 @@ const DashboardLayout = ({ children }) => {
           
           <div className="flex-1 h-0 pt-5 pb-4 overflow-y-auto">
             <div className="flex-shrink-0 flex items-center px-4">
-              <Link to="/dashboard" className="text-xl font-bold text-gray-900 dark:text-white">
+              {/* Update the logo link to navigate to landing page */}
+              <Link to="/landing" className="text-xl font-bold text-gray-900 dark:text-white">
                 SaaSPro
               </Link>
             </div>
@@ -173,6 +188,9 @@ const DashboardLayout = ({ children }) => {
             </Link>
           </div>
         </div>
+        <div className="flex-shrink-0 w-14" aria-hidden="true">
+          {/* Dummy element to force sidebar to shrink to fit close icon */}
+        </div>
       </div>
 
       {/* Static sidebar for desktop */}
@@ -181,7 +199,8 @@ const DashboardLayout = ({ children }) => {
           <div className="flex-1 flex flex-col min-h-0 border-r border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800">
             <div className="flex-1 flex flex-col pt-5 pb-4 overflow-y-auto">
               <div className="flex items-center flex-shrink-0 px-4">
-                <Link to="/dashboard" className="text-xl font-bold text-gray-900 dark:text-white">
+                {/* Update the logo link to navigate to landing page */}
+                <Link to="/landing" className="text-xl font-bold text-gray-900 dark:text-white">
                   SaaSPro
                 </Link>
               </div>
@@ -250,7 +269,7 @@ const DashboardLayout = ({ children }) => {
           </button>
           <div className="flex-1 px-4 flex justify-between">
             <div className="flex-1 flex">
-              <div className="w-full flex md:ml-0">
+              <form className="w-full flex md:ml-0" onSubmit={handleSearch}>
                 <label htmlFor="search-field" className="sr-only">
                   Search
                 </label>
@@ -265,66 +284,19 @@ const DashboardLayout = ({ children }) => {
                     className="block w-full h-full pl-8 pr-3 py-2 border-transparent text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:placeholder-gray-400 dark:focus:placeholder-gray-500 focus:ring-0 focus:border-transparent bg-white dark:bg-gray-800 sm:text-sm"
                     placeholder="Search"
                     type="search"
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
                   />
                 </div>
-              </div>
+              </form>
             </div>
             <div className="ml-4 flex items-center md:ml-6">
               <DarkModeToggle />
 
-              <button
-                type="button"
-                className="mx-2 bg-white dark:bg-gray-800 p-1 rounded-full text-gray-400 dark:text-gray-400 hover:text-gray-500 dark:hover:text-gray-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary"
-              >
-                <span className="sr-only">View notifications</span>
-                <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
-                </svg>
-              </button>
+              <NotificationsDropdown />
 
               {/* Profile dropdown */}
-              <div className="ml-3 relative" ref={profileMenuRef}>
-                <div>
-                  <button
-                    type="button"
-                    className="max-w-xs bg-white dark:bg-gray-800 rounded-full flex items-center text-sm focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary"
-                    id="user-menu-button"
-                    aria-expanded={isProfileMenuOpen ? 'true' : 'false'}
-                    aria-haspopup="true"
-                    onClick={() => setIsProfileMenuOpen(!isProfileMenuOpen)}
-                  >
-                    <span className="sr-only">Open user menu</span>
-                    <img
-                      className="h-8 w-8 rounded-full"
-                      src="https://randomuser.me/api/portraits/men/32.jpg"
-                      alt="User avatar"
-                      onError={(e) => {
-                        e.target.src = `https://ui-avatars.com/api/?name=User&background=random`;
-                      }}
-                    />
-                  </button>
-                </div>
-
-                {isProfileMenuOpen && (
-                  <div
-                    className="origin-top-right absolute right-0 mt-2 w-48 rounded-md shadow-lg py-1 bg-white dark:bg-gray-800 ring-1 ring-black ring-opacity-5 focus:outline-none"
-                    role="menu"
-                    aria-orientation="vertical"
-                    aria-labelledby="user-menu-button"
-                  >
-                    {userNavigation.map((item) => (
-                      <Link
-                        key={item.name}
-                        to={item.href}
-                        className="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
-                        role="menuitem"
-                      >
-                        {item.name}
-                      </Link>
-                    ))}
-                  </div>
-                )}
-              </div>
+              <ProfileDropdown />
             </div>
           </div>
         </div>
@@ -332,6 +304,7 @@ const DashboardLayout = ({ children }) => {
         {/* Main content */}
         <main className="flex-1 relative overflow-y-auto focus:outline-none bg-gray-100 dark:bg-gray-900">
           {children}
+          <Footer />
         </main>
       </div>
     </div>
