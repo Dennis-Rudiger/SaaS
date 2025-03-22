@@ -16,6 +16,11 @@ const Navbar = () => {
     { name: 'Contact', sectionId: 'contact' },
   ];
 
+  // Pages to link to directly (not scroll sections)
+  const pageLinks = [
+    { name: 'Demo', path: '/demo' },
+  ];
+
   // Handle scroll event to change navbar appearance
   useEffect(() => {
     const handleScroll = () => {
@@ -68,6 +73,17 @@ const Navbar = () => {
               >
                 {item.name}
               </button>
+            ))}
+            
+            {/* Page links */}
+            {pageLinks.map((item) => (
+              <Link
+                key={item.name}
+                to={item.path}
+                className="text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors"
+              >
+                {item.name}
+              </Link>
             ))}
           </nav>
 
@@ -122,6 +138,18 @@ const Navbar = () => {
               >
                 {item.name}
               </button>
+            ))}
+            
+            {/* Page links in mobile menu */}
+            {pageLinks.map((item) => (
+              <Link
+                key={item.name}
+                to={item.path}
+                className="block w-full text-left px-3 py-2 rounded-md text-base font-medium text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white hover:bg-gray-50 dark:hover:bg-gray-700"
+                onClick={() => setIsMobileMenuOpen(false)}
+              >
+                {item.name}
+              </Link>
             ))}
           </div>
           <div className="pt-4 pb-3 border-t border-gray-200 dark:border-gray-700">

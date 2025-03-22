@@ -15,6 +15,7 @@ import NotFoundPage from './pages/NotFoundPage';
 import ProjectsPage from './pages/ProjectsPage';
 import CalendarPage from './pages/CalendarPage';
 import ProjectDetailsPage from './pages/ProjectDetailsPage';
+import DemoPage from './pages/DemoPage'; // Import the new DemoPage
 
 function App() {
   const { isDarkMode } = useTheme();
@@ -44,6 +45,9 @@ function App() {
           <Route path="/login" element={<LoginPage />} />
           <Route path="/signup" element={<SignupPage />} />
           <Route path="/subscription" element={<SubscriptionPage />} />
+          
+          {/* Demo Page */}
+          <Route path="/demo" element={<DemoPage />} />
           
           {/* Dashboard routes */}
           <Route path="/dashboard" element={<DashboardPage />} />

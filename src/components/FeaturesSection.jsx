@@ -88,7 +88,7 @@ const integrations = [
   },
   { 
     name: 'Dropbox', 
-    icon: 'https://cdn.worldvectorlogo.com/logos/dropbox-icon.svg',
+    icon: 'https://cdn.worldvectorlogo.com/logos/dropbox-1.svg',
     category: 'Storage'
   },
   { 
@@ -103,7 +103,7 @@ const integrations = [
   },
   { 
     name: 'Figma', 
-    icon: 'https://cdn.worldvectorlogo.com/logos/figma-1.svg',
+    icon: 'https://cdn.worldvectorlogo.com/logos/figma-icon.svg',
     category: 'Design'
   },
   { 

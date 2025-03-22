@@ -9,9 +9,9 @@ module.exports = {
     extend: {
       colors: {
         primary: {
-          DEFAULT: 'var(--color-primary)',
-          dark: 'var(--color-primary-dark)',
-          light: 'var(--color-primary-light)',
+          DEFAULT: '#4f46e5',
+          dark: '#4338ca',
+          light: '#6366f1',
         },
       },
       fontFamily: {
@@ -26,7 +26,8 @@ module.exports = {
         'bounce-slow': 'bounce 3s linear infinite',
         'pulse-slow': 'pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite',
         blob: "blob 7s infinite",
-        grow: "grow 6s linear 1"
+        grow: "grow 6s linear 1",
+        ping: "ping 1s cubic-bezier(0, 0, 0.2, 1) infinite"
       },
       keyframes: {
         blob: {
@@ -38,6 +39,9 @@ module.exports = {
         grow: {
           "0%": { transform: "scaleX(0)" },
           "100%": { transform: "scaleX(1)" }
+        },
+        ping: {
+          "75%, 100%": { transform: "scale(2)", opacity: "0" }
         }
       },
       boxShadow: {

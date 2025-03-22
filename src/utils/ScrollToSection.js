@@ -1,18 +1,11 @@
 // Utility function to scroll to a specific section by ID
 export const scrollToSection = (sectionId) => {
   const element = document.getElementById(sectionId);
-  
   if (element) {
-    // Get the height of the sticky header (if any)
-    const header = document.querySelector('header');
-    const offset = header ? header.offsetHeight : 0;
-    
-    // Calculate position with offset
-    const bodyRect = document.body.getBoundingClientRect().top;
-    const elementRect = element.getBoundingClientRect().top;
-    const elementPosition = elementRect - bodyRect;
-    const offsetPosition = elementPosition - offset - 20; // Extra 20px for breathing room
-    
+    const headerOffset = 80; // Account for fixed header
+    const elementPosition = element.getBoundingClientRect().top;
+    const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
+
     window.scrollTo({
       top: offsetPosition,
       behavior: 'smooth'

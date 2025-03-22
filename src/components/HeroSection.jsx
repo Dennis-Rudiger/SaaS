@@ -37,12 +37,12 @@ const HeroSection = () => {
               >
                 Get Started Free
               </Link>
-              <button 
-                onClick={() => scrollToSection('features')}
+              <Link 
+                to="/demo"
                 className="px-8 py-3 border border-gray-300 dark:border-gray-600 text-gray-800 dark:text-white font-medium rounded-md hover:bg-gray-50 dark:hover:bg-gray-700 transition"
               >
-                Learn More
-              </button>
+                See Demo
+              </Link>
             </div>
             
             <div className="mt-8 flex items-center text-sm text-gray-600 dark:text-gray-400">
