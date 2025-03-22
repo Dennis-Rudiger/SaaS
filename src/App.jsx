@@ -16,6 +16,10 @@ import ProjectsPage from './pages/ProjectsPage';
 import CalendarPage from './pages/CalendarPage';
 import ProjectDetailsPage from './pages/ProjectDetailsPage';
 import DemoPage from './pages/DemoPage'; // Import the new DemoPage
+import TutorialsPage from './pages/TutorialsPage';
+import CommunityPage from './pages/CommunityPage';
+import ApiDocumentation from './pages/ApiDocumentation';
+import GettingStarted from './pages/GettingStarted';
 
 function App() {
   const { isDarkMode } = useTheme();
@@ -57,6 +61,12 @@ function App() {
           <Route path="/projects/:projectId" element={<ProjectDetailsPage />} />
           <Route path="/calendar" element={<CalendarPage />} />
           <Route path="/tasks" element={<DashboardPage />} />
+          
+          {/* Documentation routes */}
+          <Route path="/tutorials" element={<TutorialsPage />} />
+          <Route path="/community" element={<CommunityPage />} />
+          <Route path="/docs/api" element={<ApiDocumentation />} />
+          <Route path="/docs/getting-started" element={<GettingStarted />} />
           
           {/* For any other route, go to home */}
           <Route path="*" element={<Navigate to="/" />} />
