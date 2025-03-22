@@ -7,13 +7,13 @@ const Footer = () => {
 
   const footerLinks = {
     product: [
-      { title: 'Features', href: '/features' },
+      { title: 'Features', href: '/#features' }, // Changed to link to section on landing page
       { title: 'Security', href: '/security' },
-      { title: 'Pricing', href: '/pricing' },
+      { title: 'Pricing', href: '/#pricing' }, // Also updated pricing to point to section
       { title: 'Roadmap', href: '/roadmap' }
     ],
     company: [
-      { title: 'About', href: '/about' },
+      { title: 'About', href: '/#home' }, // Changed to link to hero section
       { title: 'Careers', href: '/careers' },
       { title: 'Blog', href: '/blog' },
       { title: 'Press', href: '/press' }
@@ -62,6 +62,28 @@ const Footer = () => {
     },
   ];
 
+  // Helper function to handle anchor links and smooth scrolling
+  const handleSectionLink = (e, href) => {
+    // If it's an anchor link
+    if (href.startsWith('/#')) {
+      e.preventDefault();
+      
+      // Check if we're on the landing page
+      if (window.location.pathname === '/') {
+        // Get the element ID without the '/#'
+        const sectionId = href.substring(2);
+        const section = document.getElementById(sectionId);
+        
+        if (section) {
+          section.scrollIntoView({ behavior: 'smooth' });
+        }
+      } else {
+        // Navigate to landing page with the anchor
+        window.location.href = href;
+      }
+    }
+  };
+
   return (
     <footer className="bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-800">
       <div className="container mx-auto px-4 py-12">
@@ -99,7 +121,11 @@ const Footer = () => {
               <ul role="list" className="mt-4 space-y-4">
                 {footerLinks.product.map((item) => (
                   <li key={item.title}>
-                    <Link to={item.href} className="text-base text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white">
+                    <Link 
+                      to={item.href} 
+                      className="text-base text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white"
+                      onClick={(e) => handleSectionLink(e, item.href)}
+                    >
                       {item.title}
                     </Link>
                   </li>
@@ -113,7 +139,11 @@ const Footer = () => {
               <ul role="list" className="mt-4 space-y-4">
                 {footerLinks.company.map((item) => (
                   <li key={item.title}>
-                    <Link to={item.href} className="text-base text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white">
+                    <Link 
+                      to={item.href} 
+                      className="text-base text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white"
+                      onClick={(e) => handleSectionLink(e, item.href)}
+                    >
                       {item.title}
                     </Link>
                   </li>

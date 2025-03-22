@@ -3,23 +3,45 @@ import { Link } from 'react-router-dom';
 import { scrollToSection } from '../utils/ScrollToSection';
 import DarkModeToggle from './DarkModeToggle';
 
+// Add this utility function to combine class names
+function classNames(...classes) {
+  return classes.filter(Boolean).join(' ');
+}
+
 const Navbar = () => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
-  // Navigation items that will scroll to sections on the landing page
-  const navigationItems = [
-    { name: 'Features', sectionId: 'features' },
-    { name: 'Testimonials', sectionId: 'testimonials' },
-    { name: 'Pricing', sectionId: 'pricing' },
-    { name: 'FAQ', sectionId: 'faq' },
-    { name: 'Contact', sectionId: 'contact' },
+  // Update the navigation items array in the Navbar component
+  const navigation = [
+    { name: 'Home', href: '/' },
+    { name: 'Features', href: '/#features' }, // Changed to link to section on landing page
+    { name: 'Pricing', href: '/#pricing' }, // Changed to link to section on landing page
+    { name: 'About', href: '/#home' }, // Changed to link to hero section
+    { name: 'Contact', href: '/#contact' }, // Changed to link to contact section
   ];
 
-  // Pages to link to directly (not scroll sections)
-  const pageLinks = [
-    { name: 'Demo', path: '/demo' },
-  ];
+  // Add a helper function to handle section links
+  const handleSectionLink = (e, href) => {
+    // If it's an anchor link
+    if (href.startsWith('/#')) {
+      e.preventDefault();
+      
+      // Check if we're on the landing page
+      if (window.location.pathname === '/') {
+        // Get the element ID without the '/#'
+        const sectionId = href.substring(2);
+        const section = document.getElementById(sectionId);
+        
+        if (section) {
+          section.scrollIntoView({ behavior: 'smooth' });
+        }
+      } else {
+        // Navigate to landing page with the anchor
+        window.location.href = href;
+      }
+    }
+  };
 
   // Handle scroll event to change navbar appearance
   useEffect(() => {
@@ -65,22 +87,16 @@ const Navbar = () => {
 
           {/* Desktop Navigation */}
           <nav className="hidden md:flex items-center space-x-8">
-            {navigationItems.map((item) => (
-              <button
-                key={item.name}
-                onClick={() => handleNavigation(item.sectionId)}
-                className="text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors"
-              >
-                {item.name}
-              </button>
-            ))}
-            
-            {/* Page links */}
-            {pageLinks.map((item) => (
+            {navigation.map((item) => (
               <Link
                 key={item.name}
-                to={item.path}
-                className="text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors"
+                to={item.href}
+                className={classNames(
+                  item.current ? 'text-primary dark:text-primary-light' : 'text-gray-600 dark:text-gray-300 hover:text-primary dark:hover:text-primary-light',
+                  'px-3 py-2 rounded-md text-sm font-medium transition-colors'
+                )}
+                onClick={(e) => handleSectionLink(e, item.href)}
+                aria-current={item.current ? 'page' : undefined}
               >
                 {item.name}
               </Link>
@@ -130,23 +146,16 @@ const Navbar = () => {
       {isMobileMenuOpen && (
         <div className="md:hidden bg-white dark:bg-gray-800 shadow-lg border-t border-gray-200 dark:border-gray-700">
           <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3">
-            {navigationItems.map((item) => (
-              <button
-                key={item.name}
-                onClick={() => handleNavigation(item.sectionId)}
-                className="block w-full text-left px-3 py-2 rounded-md text-base font-medium text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white hover:bg-gray-50 dark:hover:bg-gray-700"
-              >
-                {item.name}
-              </button>
-            ))}
-            
-            {/* Page links in mobile menu */}
-            {pageLinks.map((item) => (
+            {navigation.map((item) => (
               <Link
                 key={item.name}
-                to={item.path}
-                className="block w-full text-left px-3 py-2 rounded-md text-base font-medium text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white hover:bg-gray-50 dark:hover:bg-gray-700"
-                onClick={() => setIsMobileMenuOpen(false)}
+                to={item.href}
+                className={classNames(
+                  item.current ? 'text-primary dark:text-primary-light' : 'text-gray-600 dark:text-gray-300 hover:text-primary dark:hover:text-primary-light',
+                  'block w-full text-left px-3 py-2 rounded-md text-base font-medium transition-colors'
+                )}
+                onClick={(e) => handleSectionLink(e, item.href)}
+                aria-current={item.current ? 'page' : undefined}
               >
                 {item.name}
               </Link>

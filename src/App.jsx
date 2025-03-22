@@ -21,6 +21,39 @@ import CommunityPage from './pages/CommunityPage';
 import ApiDocumentation from './pages/ApiDocumentation';
 import GettingStarted from './pages/GettingStarted';
 
+// Import product pages
+import { 
+  FeaturesPage, 
+  SecurityPage, 
+  PricingPage, 
+  RoadmapPage 
+} from './pages/ProductPages';
+
+// Import company pages
+import { 
+  AboutPage, 
+  CareersPage, 
+  BlogPage, 
+  PressPage 
+} from './pages/CompanyPages';
+
+// Import resource pages
+import { 
+  DocumentationPage, 
+  GuidesPage, 
+  SupportPage, 
+  ApiPage 
+} from './pages/ResourcePages';
+
+// Import legal pages
+import { 
+  PrivacyPage, 
+  TermsPage, 
+  CookiePolicyPage, 
+  GdprPage,
+  CookieSettingsPage 
+} from './pages/LegalPages';
+
 function App() {
   const { isDarkMode } = useTheme();
   
@@ -67,6 +100,31 @@ function App() {
           <Route path="/community" element={<CommunityPage />} />
           <Route path="/docs/api" element={<ApiDocumentation />} />
           <Route path="/docs/getting-started" element={<GettingStarted />} />
+          
+          {/* Product pages */}
+          <Route path="/features" element={<FeaturesPage />} />
+          <Route path="/security" element={<SecurityPage />} />
+          <Route path="/pricing" element={<PricingPage />} />
+          <Route path="/roadmap" element={<RoadmapPage />} />
+          
+          {/* Company pages */}
+          <Route path="/about" element={<AboutPage />} />
+          <Route path="/careers" element={<CareersPage />} />
+          <Route path="/blog" element={<BlogPage />} />
+          <Route path="/press" element={<PressPage />} />
+          
+          {/* Resource pages */}
+          <Route path="/docs" element={<DocumentationPage />} />
+          <Route path="/guides" element={<GuidesPage />} />
+          <Route path="/support" element={<SupportPage />} />
+          <Route path="/api" element={<ApiPage />} />
+          
+          {/* Legal pages */}
+          <Route path="/privacy" element={<PrivacyPage />} />
+          <Route path="/terms" element={<TermsPage />} />
+          <Route path="/cookie-policy" element={<CookiePolicyPage />} />
+          <Route path="/gdpr" element={<GdprPage />} />
+          <Route path="/cookies" element={<CookieSettingsPage />} />
           
           {/* For any other route, go to home */}
           <Route path="*" element={<Navigate to="/" />} />
