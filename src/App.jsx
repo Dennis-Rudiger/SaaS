@@ -1,6 +1,7 @@
 import React, { useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { ThemeProvider, useTheme } from './contexts/ThemeContext';
+import { AuthProvider } from './contexts/AuthContext';
 import { initAnalytics } from './utils/analytics';
 
 // Pages
@@ -54,6 +55,9 @@ import {
   CookieSettingsPage 
 } from './pages/LegalPages';
 
+// Import the test component
+import SupabaseConnectionTest from './components/SupabaseConnectionTest';
+
 function App() {
   const { isDarkMode } = useTheme();
   
@@ -73,63 +77,68 @@ function App() {
 
   return (
     <ThemeProvider>
-      <Router>
-        <Routes>
-          {/* Make landing page the home page */}
-          <Route path="/" element={<LandingPage />} />
-          
-          {/* Auth routes */}
-          <Route path="/login" element={<LoginPage />} />
-          <Route path="/signup" element={<SignupPage />} />
-          <Route path="/subscription" element={<SubscriptionPage />} />
-          
-          {/* Demo Page */}
-          <Route path="/demo" element={<DemoPage />} />
-          
-          {/* Dashboard routes */}
-          <Route path="/dashboard" element={<DashboardPage />} />
-          <Route path="/settings" element={<SettingsPage />} />
-          <Route path="/billing" element={<BillingPage />} />
-          <Route path="/projects" element={<ProjectsPage />} />
-          <Route path="/projects/:projectId" element={<ProjectDetailsPage />} />
-          <Route path="/calendar" element={<CalendarPage />} />
-          <Route path="/tasks" element={<DashboardPage />} />
-          
-          {/* Documentation routes */}
-          <Route path="/tutorials" element={<TutorialsPage />} />
-          <Route path="/community" element={<CommunityPage />} />
-          <Route path="/docs/api" element={<ApiDocumentation />} />
-          <Route path="/docs/getting-started" element={<GettingStarted />} />
-          
-          {/* Product pages */}
-          <Route path="/features" element={<FeaturesPage />} />
-          <Route path="/security" element={<SecurityPage />} />
-          <Route path="/pricing" element={<PricingPage />} />
-          <Route path="/roadmap" element={<RoadmapPage />} />
-          
-          {/* Company pages */}
-          <Route path="/about" element={<AboutPage />} />
-          <Route path="/careers" element={<CareersPage />} />
-          <Route path="/blog" element={<BlogPage />} />
-          <Route path="/press" element={<PressPage />} />
-          
-          {/* Resource pages */}
-          <Route path="/docs" element={<DocumentationPage />} />
-          <Route path="/guides" element={<GuidesPage />} />
-          <Route path="/support" element={<SupportPage />} />
-          <Route path="/api" element={<ApiPage />} />
-          
-          {/* Legal pages */}
-          <Route path="/privacy" element={<PrivacyPage />} />
-          <Route path="/terms" element={<TermsPage />} />
-          <Route path="/cookie-policy" element={<CookiePolicyPage />} />
-          <Route path="/gdpr" element={<GdprPage />} />
-          <Route path="/cookies" element={<CookieSettingsPage />} />
-          
-          {/* For any other route, go to home */}
-          <Route path="*" element={<Navigate to="/" />} />
-        </Routes>
-      </Router>
+      <AuthProvider>
+        <Router>
+          <Routes>
+            {/* Make landing page the home page */}
+            <Route path="/" element={<LandingPage />} />
+            
+            {/* Auth routes */}
+            <Route path="/login" element={<LoginPage />} />
+            <Route path="/signup" element={<SignupPage />} />
+            <Route path="/subscription" element={<SubscriptionPage />} />
+            
+            {/* Demo Page */}
+            <Route path="/demo" element={<DemoPage />} />
+            
+            {/* Dashboard routes */}
+            <Route path="/dashboard" element={<DashboardPage />} />
+            <Route path="/settings" element={<SettingsPage />} />
+            <Route path="/billing" element={<BillingPage />} />
+            <Route path="/projects" element={<ProjectsPage />} />
+            <Route path="/projects/:projectId" element={<ProjectDetailsPage />} />
+            <Route path="/calendar" element={<CalendarPage />} />
+            <Route path="/tasks" element={<DashboardPage />} />
+            
+            {/* Documentation routes */}
+            <Route path="/tutorials" element={<TutorialsPage />} />
+            <Route path="/community" element={<CommunityPage />} />
+            <Route path="/docs/api" element={<ApiDocumentation />} />
+            <Route path="/docs/getting-started" element={<GettingStarted />} />
+            
+            {/* Product pages */}
+            <Route path="/features" element={<FeaturesPage />} />
+            <Route path="/security" element={<SecurityPage />} />
+            <Route path="/pricing" element={<PricingPage />} />
+            <Route path="/roadmap" element={<RoadmapPage />} />
+            
+            {/* Company pages */}
+            <Route path="/about" element={<AboutPage />} />
+            <Route path="/careers" element={<CareersPage />} />
+            <Route path="/blog" element={<BlogPage />} />
+            <Route path="/press" element={<PressPage />} />
+            
+            {/* Resource pages */}
+            <Route path="/docs" element={<DocumentationPage />} />
+            <Route path="/guides" element={<GuidesPage />} />
+            <Route path="/support" element={<SupportPage />} />
+            <Route path="/api" element={<ApiPage />} />
+            
+            {/* Legal pages */}
+            <Route path="/privacy" element={<PrivacyPage />} />
+            <Route path="/terms" element={<TermsPage />} />
+            <Route path="/cookie-policy" element={<CookiePolicyPage />} />
+            <Route path="/gdpr" element={<GdprPage />} />
+            <Route path="/cookies" element={<CookieSettingsPage />} />
+            
+            {/* Add a test route */}
+            <Route path="/test-supabase" element={<SupabaseConnectionTest />} />
+            
+            {/* For any other route, go to home */}
+            <Route path="*" element={<Navigate to="/" />} />
+          </Routes>
+        </Router>
+      </AuthProvider>
     </ThemeProvider>
   );
 }

@@ -1,116 +1,127 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { useAuth } from '../contexts/AuthContext';
 import { motion } from 'framer-motion';
 import DarkModeToggle from '../components/DarkModeToggle';
+import { createUserProfile } from '../services/profileService';
 
 const SignupPage = () => {
-  const navigate = useNavigate();
   const [formData, setFormData] = useState({
-    fullName: '',
+    firstName: '',
+    lastName: '',
     email: '',
     password: '',
     confirmPassword: '',
-    companyName: '',
-    agreeTerms: false,
+    agreeToTerms: false
   });
+  
   const [errors, setErrors] = useState({});
-  const [isLoading, setIsLoading] = useState(false);
-  const [signupError, setSignupError] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [formError, setFormError] = useState('');
+  const navigate = useNavigate();
+  const { signUp } = useAuth();
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
-    setFormData((prev) => ({
+    setFormData(prev => ({
       ...prev,
-      [name]: type === 'checkbox' ? checked : value,
+      [name]: type === 'checkbox' ? checked : value
     }));
     
-    // Clear error when field is being edited
+    // Clear specific error when field is being edited
     if (errors[name]) {
-      setErrors((prev) => ({
+      setErrors(prev => ({
         ...prev,
-        [name]: '',
+        [name]: ''
       }));
     }
   };
 
   const validateForm = () => {
-    let formErrors = {};
-    let isValid = true;
-
-    if (!formData.fullName.trim()) {
-      formErrors.fullName = 'Full name is required';
-      isValid = false;
-    }
-
+    const newErrors = {};
+    
+    if (!formData.firstName.trim()) newErrors.firstName = 'First name is required';
+    if (!formData.lastName.trim()) newErrors.lastName = 'Last name is required';
+    
     if (!formData.email.trim()) {
-      formErrors.email = 'Email is required';
-      isValid = false;
+      newErrors.email = 'Email is required';
     } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
-      formErrors.email = 'Email is invalid';
-      isValid = false;
+      newErrors.email = 'Email is invalid';
     }
-
+    
     if (!formData.password) {
-      formErrors.password = 'Password is required';
-      isValid = false;
+      newErrors.password = 'Password is required';
     } else if (formData.password.length < 8) {
-      formErrors.password = 'Password must be at least 8 characters long';
-      isValid = false;
+      newErrors.password = 'Password must be at least 8 characters';
     }
-
+    
     if (formData.password !== formData.confirmPassword) {
-      formErrors.confirmPassword = 'Passwords do not match';
-      isValid = false;
+      newErrors.confirmPassword = 'Passwords do not match';
     }
-
-    if (!formData.agreeTerms) {
-      formErrors.agreeTerms = 'You must agree to the terms and conditions';
-      isValid = false;
+    
+    if (!formData.agreeToTerms) {
+      newErrors.agreeToTerms = 'You must agree to the terms';
     }
-
-    setErrors(formErrors);
-    return isValid;
+    
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setSignupError('');
+    setFormError('');
     
-    if (!validateForm()) {
-      return;
-    }
-
-    setIsLoading(true);
+    // Validate the form
+    if (!validateForm()) return;
+    
+    setLoading(true);
     
     try {
-      // Simulate API call with timeout
-      await new Promise(resolve => setTimeout(resolve, 1500));
+      // Sign up with Supabase Auth
+      const { data, error } = await signUp(
+        formData.email, 
+        formData.password,
+        { 
+          first_name: formData.firstName,
+          last_name: formData.lastName
+        }
+      );
       
-      // In a real app, you would register the user with your backend
-      localStorage.setItem('isLoggedIn', 'true');
+      if (error) throw error;
       
-      // Navigate to dashboard after successful signup
-      navigate('/dashboard');
-    } catch (err) {
-      setSignupError('An error occurred during sign up. Please try again.');
+      // Create user profile in database
+      if (data.user) {
+        await createUserProfile({
+          id: data.user.id,
+          first_name: formData.firstName,
+          last_name: formData.lastName,
+          email: formData.email
+        });
+      }
+      
+      // Show success message or redirect
+      navigate('/login?registered=true');
+    } catch (error) {
+      console.error('Signup error:', error);
+      setFormError(error.message || 'Failed to create account. Please try again.');
     } finally {
-      setIsLoading(false);
+      setLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-white dark:from-gray-900 dark:to-gray-800 flex flex-col items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-white dark:from-gray-900 dark:to-gray-800 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
       <div className="absolute top-0 left-0 w-full h-full bg-pattern opacity-5 dark:opacity-10 z-0 pointer-events-none"></div>
       
       {/* Decorative elements */}
-      <div className="absolute top-20 right-20 w-72 h-72 bg-primary opacity-10 dark:opacity-5 rounded-full filter blur-3xl"></div>
-      <div className="absolute bottom-20 left-20 w-72 h-72 bg-indigo-400 opacity-10 dark:opacity-5 rounded-full filter blur-3xl"></div>
+      <div className="absolute top-20 left-20 w-72 h-72 bg-primary opacity-10 dark:opacity-5 rounded-full filter blur-3xl"></div>
+      <div className="absolute bottom-20 right-20 w-72 h-72 bg-indigo-400 opacity-10 dark:opacity-5 rounded-full filter blur-3xl"></div>
       
       <div className="absolute top-4 right-4 z-10">
         <DarkModeToggle />
       </div>
       
-      <div className="w-full max-w-lg z-10">
+      <div className="w-full max-w-md z-10">
         <div className="relative group">
           <motion.div 
             className="absolute -inset-0.5 bg-gradient-to-r from-primary to-indigo-600 rounded-lg blur opacity-25 dark:opacity-50 group-hover:opacity-70 transition duration-1000 group-hover:duration-300"
@@ -124,177 +135,169 @@ const SignupPage = () => {
             }}
           ></motion.div>
           <div className="relative px-6 pt-8 pb-10 bg-white dark:bg-gray-800 rounded-lg shadow-xl border border-gray-200 dark:border-gray-700">
-            <div className="mx-auto text-center mb-10">
+            <div className="mx-auto text-center mb-8">
               <Link to="/" className="inline-block text-center">
                 <h2 className="text-3xl font-extrabold bg-clip-text text-transparent bg-gradient-to-r from-primary via-indigo-600 to-primary-dark">
                   SaaSPro
                 </h2>
               </Link>
               <h2 className="mt-6 text-3xl font-bold text-gray-900 dark:text-white">
-                Create an account
+                Create your account
               </h2>
               <p className="mt-2 text-sm text-gray-600 dark:text-gray-400">
-                Sign up to get started with SaaSPro
+                Start your 14-day free trial, no credit card required
               </p>
             </div>
             
-            {signupError && (
+            {formError && (
               <motion.div
                 initial={{ opacity: 0, y: -10 }}
                 animate={{ opacity: 1, y: 0 }}
                 className="mb-6 p-3 rounded-md bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-900"
               >
-                <p className="text-sm text-red-600 dark:text-red-400">{signupError}</p>
+                <p className="text-sm text-red-600 dark:text-red-400">{formError}</p>
               </motion.div>
             )}
             
             <form className="space-y-6" onSubmit={handleSubmit}>
-              <div>
-                <label htmlFor="fullName" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                  Full name
-                </label>
-                <input
-                  type="text"
-                  id="fullName"
-                  name="fullName"
-                  value={formData.fullName}
-                  onChange={handleChange}
-                  className={`w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 ${
-                    errors.fullName ? 'border-red-500 focus:ring-red-500' : 'border-gray-300 dark:border-gray-600 focus:ring-primary'
-                  } bg-white dark:bg-gray-700 text-gray-900 dark:text-white`}
-                  placeholder="John Doe"
-                  disabled={isLoading}
-                />
-                {errors.fullName && <p className="mt-1 text-sm text-red-600 dark:text-red-400">{errors.fullName}</p>}
-              </div>
-              
-              <div>
-                <label htmlFor="email" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                  Work email
-                </label>
-                <input
-                  type="email"
-                  id="email"
-                  name="email"
-                  value={formData.email}
-                  onChange={handleChange}
-                  className={`w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 ${
-                    errors.email ? 'border-red-500 focus:ring-red-500' : 'border-gray-300 dark:border-gray-600 focus:ring-primary'
-                  } bg-white dark:bg-gray-700 text-gray-900 dark:text-white`}
-                  placeholder="name@company.com"
-                  disabled={isLoading}
-                />
-                {errors.email && <p className="mt-1 text-sm text-red-600 dark:text-red-400">{errors.email}</p>}
-              </div>
-              
-              <div>
-                <label htmlFor="password" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                  Password
-                </label>
-                <input
-                  type="password"
-                  id="password"
-                  name="password"
-                  value={formData.password}
-                  onChange={handleChange}
-                  className={`w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 ${
-                    errors.password ? 'border-red-500 focus:ring-red-500' : 'border-gray-300 dark:border-gray-600 focus:ring-primary'
-                  } bg-white dark:bg-gray-700 text-gray-900 dark:text-white`}
-                  placeholder="••••••••"
-                  disabled={isLoading}
-                />
-                {errors.password && <p className="mt-1 text-sm text-red-600 dark:text-red-400">{errors.password}</p>}
-              </div>
-              
-              <div>
-                <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                  Confirm password
-                </label>
-                <input
-                  type="password"
-                  id="confirmPassword"
-                  name="confirmPassword"
-                  value={formData.confirmPassword}
-                  onChange={handleChange}
-                  className={`w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 ${
-                    errors.confirmPassword ? 'border-red-500 focus:ring-red-500' : 'border-gray-300 dark:border-gray-600 focus:ring-primary'
-                  } bg-white dark:bg-gray-700 text-gray-900 dark:text-white`}
-                  placeholder="••••••••"
-                  disabled={isLoading}
-                />
-                {errors.confirmPassword && <p className="mt-1 text-sm text-red-600 dark:text-red-400">{errors.confirmPassword}</p>}
-              </div>
-              
-              <div>
-                <label htmlFor="companyName" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                  Company name <span className="text-gray-500">(optional)</span>
-                </label>
-                <input
-                  type="text"
-                  id="companyName"
-                  name="companyName"
-                  value={formData.companyName}
-                  onChange={handleChange}
-                  className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-primary bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-                  placeholder="Your company"
-                  disabled={isLoading}
-                />
-              </div>
-              
-              <div>
-                <div className="flex items-start">
-                  <div className="flex items-center h-5">
-                    <input
-                      type="checkbox"
-                      id="agreeTerms"
-                      name="agreeTerms"
-                      checked={formData.agreeTerms}
-                      onChange={handleChange}
-                      className={`h-4 w-4 ${
-                        errors.agreeTerms ? 'border-red-500 text-red-500' : 'border-gray-300 text-primary'
-                      } rounded focus:ring-primary dark:border-gray-600 dark:bg-gray-700`}
-                      disabled={isLoading}
-                    />
-                  </div>
-                  <div className="ml-3">
-                    <label htmlFor="agreeTerms" className="text-sm text-gray-700 dark:text-gray-300">
-                      I agree to the{' '}
-                      <Link to="/terms" className="text-primary hover:text-primary-dark">
-                        Terms of Service
-                      </Link>{' '}
-                      and{' '}
-                      <Link to="/privacy" className="text-primary hover:text-primary-dark">
-                        Privacy Policy
-                      </Link>
-                    </label>
-                    {errors.agreeTerms && <p className="mt-1 text-sm text-red-600 dark:text-red-400">{errors.agreeTerms}</p>}
-                  </div>
+              {/* Name fields */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label htmlFor="firstName" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    First Name
+                  </label>
+                  <input
+                    id="firstName"
+                    name="firstName"
+                    type="text"
+                    required
+                    value={formData.firstName}
+                    onChange={handleChange}
+                    className={`w-full px-3 py-2 border ${errors.firstName ? 'border-red-500' : 'border-gray-300 dark:border-gray-600'} rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white`}
+                    placeholder="John"
+                  />
+                  {errors.firstName && <p className="mt-1 text-xs text-red-500">{errors.firstName}</p>}
+                </div>
+                
+                <div>
+                  <label htmlFor="lastName" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    Last Name
+                  </label>
+                  <input
+                    id="lastName"
+                    name="lastName"
+                    type="text"
+                    required
+                    value={formData.lastName}
+                    onChange={handleChange}
+                    className={`w-full px-3 py-2 border ${errors.lastName ? 'border-red-500' : 'border-gray-300 dark:border-gray-600'} rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white`}
+                    placeholder="Doe"
+                  />
+                  {errors.lastName && <p className="mt-1 text-xs text-red-500">{errors.lastName}</p>}
                 </div>
               </div>
               
-              <button
-                type="submit"
-                className="w-full py-2.5 px-4 bg-primary text-white font-medium rounded-md hover:bg-primary-dark focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary disabled:opacity-70 disabled:cursor-not-allowed"
-                disabled={isLoading}
-              >
-                {isLoading ? (
-                  <span className="flex items-center justify-center">
-                    <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                    </svg>
-                    Creating account...
-                  </span>
-                ) : (
-                  'Create account'
-                )}
-              </button>
+              <div>
+                <label htmlFor="email" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  Email Address
+                </label>
+                <input
+                  id="email"
+                  name="email"
+                  type="email"
+                  autoComplete="email"
+                  required
+                  value={formData.email}
+                  onChange={handleChange}
+                  className={`w-full px-3 py-2 border ${errors.email ? 'border-red-500' : 'border-gray-300 dark:border-gray-600'} rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white`}
+                  placeholder="you@example.com"
+                />
+                {errors.email && <p className="mt-1 text-xs text-red-500">{errors.email}</p>}
+              </div>
+
+              <div>
+                <label htmlFor="password" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  Password
+                </label>
+                <input
+                  id="password"
+                  name="password"
+                  type="password"
+                  required
+                  value={formData.password}
+                  onChange={handleChange}
+                  className={`w-full px-3 py-2 border ${errors.password ? 'border-red-500' : 'border-gray-300 dark:border-gray-600'} rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white`}
+                  placeholder="••••••••"
+                />
+                {errors.password && <p className="mt-1 text-xs text-red-500">{errors.password}</p>}
+              </div>
+              
+              <div>
+                <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  Confirm Password
+                </label>
+                <input
+                  id="confirmPassword"
+                  name="confirmPassword"
+                  type="password"
+                  required
+                  value={formData.confirmPassword}
+                  onChange={handleChange}
+                  className={`w-full px-3 py-2 border ${errors.confirmPassword ? 'border-red-500' : 'border-gray-300 dark:border-gray-600'} rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white`}
+                  placeholder="••••••••"
+                />
+                {errors.confirmPassword && <p className="mt-1 text-xs text-red-500">{errors.confirmPassword}</p>}
+              </div>
+
+              <div className="flex items-start">
+                <div className="flex items-center h-5">
+                  <input
+                    id="agreeToTerms"
+                    name="agreeToTerms"
+                    type="checkbox"
+                    checked={formData.agreeToTerms}
+                    onChange={handleChange}
+                    className="w-4 h-4 rounded border-gray-300 text-primary focus:ring-primary"
+                  />
+                </div>
+                <div className="ml-3">
+                  <label htmlFor="agreeToTerms" className={`text-sm ${errors.agreeToTerms ? 'text-red-500' : 'text-gray-600 dark:text-gray-400'}`}>
+                    I agree to the{' '}
+                    <Link to="/terms" className="text-primary hover:text-primary-dark">Terms of Service</Link>
+                    {' '}and{' '}
+                    <Link to="/privacy" className="text-primary hover:text-primary-dark">Privacy Policy</Link>
+                  </label>
+                  {errors.agreeToTerms && <p className="mt-1 text-xs text-red-500">{errors.agreeToTerms}</p>}
+                </div>
+              </div>
+
+              <div>
+                <button
+                  type="submit"
+                  disabled={loading}
+                  className={`w-full flex justify-center py-3 px-4 border border-transparent rounded-lg shadow-sm text-base font-medium text-white bg-gradient-to-r from-primary to-primary-dark hover:from-primary-dark hover:to-primary focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-dark transition-colors ${
+                    loading ? 'opacity-70 cursor-not-allowed' : ''
+                  }`}
+                >
+                  {loading ? (
+                    <>
+                      <svg className="animate-spin h-5 w-5 mr-3 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                      </svg>
+                      Creating account...
+                    </>
+                  ) : (
+                    'Create account'
+                  )}
+                </button>
+              </div>
             </form>
-            
-            <div className="mt-8 text-center">
+
+            <div className="mt-6 text-center">
               <p className="text-sm text-gray-600 dark:text-gray-400">
                 Already have an account?{' '}
-                <Link to="/login" className="text-primary hover:text-primary-dark font-medium">
+                <Link to="/login" className="font-medium text-primary hover:text-primary-dark">
                   Sign in
                 </Link>
               </p>

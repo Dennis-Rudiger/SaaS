@@ -1,44 +1,50 @@
-import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
+import { useAuth } from '../contexts/AuthContext';
 import { motion } from 'framer-motion';
 import DarkModeToggle from '../components/DarkModeToggle';
 
 const LoginPage = () => {
-  const navigate = useNavigate();
-  const [formData, setFormData] = useState({
-    email: '',
-    password: '',
-    rememberMe: false,
-  });
-  const [isLoading, setIsLoading] = useState(false);
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [registrationSuccess, setRegistrationSuccess] = useState(false);
+  const navigate = useNavigate();
+  const location = useLocation();
+  const { signIn } = useAuth();
 
-  const handleChange = (e) => {
-    const { name, value, type, checked } = e.target;
-    setFormData((prev) => ({
-      ...prev,
-      [name]: type === 'checkbox' ? checked : value,
-    }));
-  };
+  // Check for successful registration
+  useEffect(() => {
+    const searchParams = new URLSearchParams(location.search);
+    if (searchParams.get('registered') === 'true') {
+      setRegistrationSuccess(true);
+    }
+  }, [location]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setIsLoading(true);
+    setLoading(true);
     setError('');
-    
+
+    // Basic validation
+    if (!email.trim() || !password.trim()) {
+      setError('Please enter both email and password');
+      setLoading(false);
+      return;
+    }
+
     try {
-      // Simulate API call with timeout
-      await new Promise(resolve => setTimeout(resolve, 1500));
+      const { data, error } = await signIn(email, password);
       
-      // In a real app, you would validate credentials with your backend
-      localStorage.setItem('isLoggedIn', 'true');
+      if (error) throw error;
       
-      // Navigate to dashboard
+      // Redirect to dashboard on successful login
       navigate('/dashboard');
-    } catch (err) {
-      setError('Invalid email or password. Please try again.');
+    } catch (error) {
+      setError(error.message || 'Failed to sign in');
     } finally {
-      setIsLoading(false);
+      setLoading(false);
     }
   };
 
@@ -114,6 +120,18 @@ const LoginPage = () => {
               </div>
             </div>
             
+            {registrationSuccess && (
+              <motion.div
+                initial={{ opacity: 0, y: -10 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="mb-4 p-3 rounded-md bg-green-50 dark:bg-green-900/30 border border-green-200 dark:border-green-900"
+              >
+                <p className="text-sm text-green-600 dark:text-green-400">
+                  Your account has been created successfully! Please sign in to continue.
+                </p>
+              </motion.div>
+            )}
+
             {error && (
               <motion.div
                 initial={{ opacity: 0, y: -10 }}
@@ -135,8 +153,8 @@ const LoginPage = () => {
                   type="email"
                   autoComplete="email"
                   required
-                  value={formData.email}
-                  onChange={handleChange}
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
                   className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                   placeholder="you@example.com"
                 />
@@ -157,8 +175,8 @@ const LoginPage = () => {
                   type="password"
                   autoComplete="current-password"
                   required
-                  value={formData.password}
-                  onChange={handleChange}
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
                   className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                   placeholder="••••••••"
                 />
@@ -170,8 +188,6 @@ const LoginPage = () => {
                     id="rememberMe"
                     name="rememberMe"
                     type="checkbox"
-                    checked={formData.rememberMe}
-                    onChange={handleChange}
                     className="h-4 w-4 text-primary focus:ring-primary-dark border-gray-300 dark:border-gray-600 rounded"
                   />
                   <label htmlFor="rememberMe" className="ml-2 block text-sm text-gray-700 dark:text-gray-300">
@@ -183,12 +199,12 @@ const LoginPage = () => {
               <div>
                 <button
                   type="submit"
-                  disabled={isLoading}
+                  disabled={loading}
                   className={`w-full flex justify-center py-3 px-4 border border-transparent rounded-lg shadow-sm text-base font-medium text-white bg-gradient-to-r from-primary to-primary-dark hover:from-primary-dark hover:to-primary focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-dark transition-colors ${
-                    isLoading ? 'opacity-70 cursor-not-allowed' : ''
+                    loading ? 'opacity-70 cursor-not-allowed' : ''
                   }`}
                 >
-                  {isLoading ? (
+                  {loading ? (
                     <>
                       <svg className="animate-spin h-5 w-5 mr-3 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                         <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
