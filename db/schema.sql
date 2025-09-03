@@ -169,3 +169,11 @@ DROP COLUMN IF EXISTS stripe_subscription_id;
 
 ALTER TABLE IF EXISTS public.subscriptions 
 ADD COLUMN IF NOT EXISTS paypal_subscription_id TEXT;
+
+-- Insert sample data into subscription_tiers
+INSERT INTO public.subscription_tiers (name, description, price, billing_period, features, paypal_plan_id)
+VALUES 
+('Starter', 'Basic features for small teams', 0, 'monthly', '{"projects": 3, "users": 5, "storage": "1GB"}', NULL),
+('Pro', 'Advanced features for growing businesses', 49, 'monthly', '{"projects": 50, "users": 25, "storage": "100GB", "priority_support": true}', 'YOUR_PAYPAL_PRO_PLAN_ID'),
+('Enterprise', 'Custom solutions for large organizations', 99, 'monthly', '{"projects": "Unlimited", "users": "Unlimited", "storage": "1TB", "dedicated_support": true, "sso": true}', 'YOUR_PAYPAL_ENTERPRISE_PLAN_ID')
+ON CONFLICT (name) DO NOTHING;

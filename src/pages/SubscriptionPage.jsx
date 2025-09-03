@@ -1,11 +1,15 @@
 import React, { useState, useEffect } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate, Link } from 'react-router-dom';
+import { useSubscription } from '../contexts/SubscriptionContext';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
+import DashboardLayout from '../components/dashboard/DashboardLayout';
+import DashboardHeader from '../components/dashboard/DashboardHeader';
 
 const SubscriptionPage = () => {
   const navigate = useNavigate();
   const location = useLocation();
+  const { subscription, loading, isActive } = useSubscription();
   const [selectedPlan, setSelectedPlan] = useState(null);
   const [billingCycle, setBillingCycle] = useState('annual'); // annual or monthly
   const [isLoading, setIsLoading] = useState(false);
@@ -170,8 +174,13 @@ const SubscriptionPage = () => {
     }
   };
   
-  if (!selectedPlan) {
-    return <div>Loading...</div>;
+  if (loading) {
+    return (
+      <DashboardLayout>
+        <DashboardHeader title="Subscription" />
+        <div className="text-center py-12">Loading your subscription details...</div>
+      </DashboardLayout>
+    );
   }
 
   return (

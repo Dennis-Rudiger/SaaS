@@ -2,6 +2,25 @@ import { supabase } from '../utils/supabaseClient';
 import { initPayPalClient } from '../utils/paypalClient';
 
 export const subscriptionService = {
+  /**
+   * Get all available subscription tiers from the database
+   * @returns {Promise} - The subscription tiers or an error
+   */
+  getSubscriptionTiers: async () => {
+    try {
+      const { data, error } = await supabase
+        .from('subscription_tiers')
+        .select('*')
+        .order('price', { ascending: true });
+
+      if (error) throw error;
+      return { data, error: null };
+    } catch (error) {
+      console.error('Error fetching subscription tiers:', error);
+      return { data: null, error };
+    }
+  },
+
   // Create a PayPal subscription
   createSubscription: async (planId) => {
     try {

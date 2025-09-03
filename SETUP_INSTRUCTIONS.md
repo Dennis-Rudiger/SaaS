@@ -68,6 +68,57 @@ Follow these steps to set up and run your SaaS landing page project.
 
    This will start the Vite development server and open your application in the browser.
 
+## Testing Application Features
+
+After setting up the project and initializing the database, follow these steps to test the core features. You will need at least two different user accounts to test collaboration features.
+
+### 1. User Authentication
+- **Sign Up**: Navigate to `/signup` and create a new user account.
+- **Sign In**: Go to `/login`, and you should see a success message about account creation. Log in with the new credentials.
+- **Verification**: You should be redirected to the `/dashboard`.
+
+### 2. Project Management
+- **Create Project**:
+    - Navigate to the `/projects` page.
+    - Click "New Project".
+    - Fill out the form and click "Create Project".
+    - Verify the new project appears on the projects page.
+- **View & Edit Project**:
+    - Click on the newly created project to go to its details page.
+    - Verify all details are correct.
+    - Click "Edit" and change some information (e.g., the description).
+    - Save the changes and verify they are reflected on the page.
+- **Delete Project**:
+    - On the project details page, click "Delete".
+    - Confirm the deletion.
+    - You should be redirected to the `/projects` page, and the project should be gone.
+
+### 3. Task Management
+- **Create Task**:
+    - Go to a project's detail page.
+    - In the "Tasks" section, click "Add Task".
+    - Fill out the task details and save.
+    - Verify the new task appears in the list.
+- **Update Task**:
+    - On the main dashboard (`/dashboard`), find the "My Tasks" card.
+    - Mark a task as complete by clicking the checkbox.
+    - Verify the task appears as completed (strikethrough text).
+
+### 4. Real-time Collaboration
+This tests the real-time capabilities of Supabase.
+- Open the application in two separate browser windows (or tabs).
+- In the first window, log in and navigate to the `/projects` page.
+- In the second window, log in with the same user and navigate to the `/projects` page.
+- In the first window, create a new project.
+- **Verification**: The new project should appear automatically in the second window without needing a manual refresh.
+
+### 5. Analytics and Reporting (Dashboard Stats)
+- Navigate to the `/dashboard`.
+- Note the numbers in the "Stat Cards" (e.g., Active Projects).
+- Go to the `/projects` page and create a new project.
+- Return to the `/dashboard`.
+- **Verification**: The "Active Projects" count should increase by one. (Note: This requires the dashboard to fetch live data).
+
 ## Troubleshooting
 
 ### "npm error could not determine executable to run"
