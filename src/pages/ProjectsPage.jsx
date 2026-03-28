@@ -7,11 +7,11 @@ import ProjectForm from '../components/projects/ProjectForm';
 import { getUserProjects, createProject, subscribeToProjects } from '../services/projectService';
 import { motion, AnimatePresence } from 'framer-motion';
 
-const ProjectsPage = () => {
+const ProjectsPage = ({ openNew = false }) => {
   const [projects, setProjects] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [showProjectForm, setShowProjectForm] = useState(false);
+  const [showProjectForm, setShowProjectForm] = useState(openNew);
   const [filter, setFilter] = useState('all');
   const navigate = useNavigate();
 
@@ -33,19 +33,17 @@ const ProjectsPage = () => {
   const fetchProjects = async () => {
     setLoading(true);
     const { data, error } = await getUserProjects();
-    
+
     if (error) {
       console.error('Error fetching projects:', error);
-      setError('Failed to load projects. Please try again.');
+      setError(`Failed to load projects. Error: ${error.message || error.details || error.hint || JSON.stringify(error)}`);
     } else {
       setProjects(data || []);
       setError(null);
     }
-    
-    setLoading(false);
-  };
 
-  const handleCreateProject = async (projectData) => {
+    setLoading(false);
+  };  const handleCreateProject = async (projectData) => {
     try {
       console.log("Creating project with data:", projectData);
       

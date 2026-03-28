@@ -8,10 +8,13 @@ const SubscriptionContext = createContext(null);
 export const SubscriptionProvider = ({ children }) => {
   const [subscription, setSubscription] = useState(null);
   const [loading, setLoading] = useState(true);
-  const { user } = useAuth();
+  const { user, loading: authLoading } = useAuth();
 
   useEffect(() => {
     const fetchSubscription = async () => {
+      // Don't do anything if Auth is still figuring out who is logged in
+      if (authLoading) return;
+
       if (!user) {
         setSubscription(null);
         setLoading(false);
@@ -110,13 +113,21 @@ export const SubscriptionProvider = ({ children }) => {
     return () => {
       subscriptionListener.unsubscribe();
     };
-  }, [user]);
+  }, [user, authLoading]);
 
-  // Check if subscription is active
+  // Check if subscription is active or in a valid trial
   const isSubscriptionActive = Boolean(
+    subscription &&
+    (
+      subscription.status === 'active' || 
+      (subscription.status === 'trialing' && new Date(subscription.trial_end) > new Date())
+    )
+  );
+
+  const isTrialExpired = Boolean(
     subscription && 
-    (subscription.status === 'active' || 
-     subscription.status === 'trialing')
+    subscription.status === 'trialing' && 
+    new Date(subscription.trial_end) <= new Date()
   );
 
   return (
@@ -125,6 +136,7 @@ export const SubscriptionProvider = ({ children }) => {
         subscription,
         loading,
         isActive: isSubscriptionActive,
+        isTrialExpired,
       }}
     >
       {children}

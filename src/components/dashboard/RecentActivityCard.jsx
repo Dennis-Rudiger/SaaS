@@ -1,71 +1,23 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-
-// Sample activity data
-const sampleActivities = [
-  {
-    id: 1,
-    user: {
-      name: 'Sarah Johnson',
-      avatar: 'https://randomuser.me/api/portraits/women/44.jpg'
-    },
-    type: 'comment',
-    content: 'Added a new comment on',
-    target: 'Landing Page Design',
-    time: '10 minutes ago',
-    link: '/projects/3/tasks/42'
-  },
-  {
-    id: 2,
-    user: {
-      name: 'Michael Lee',
-      avatar: 'https://randomuser.me/api/portraits/men/86.jpg'
-    },
-    type: 'task_completed',
-    content: 'Completed task',
-    target: 'Implement Authentication',
-    time: '1 hour ago',
-    link: '/projects/1/tasks/15'
-  },
-  {
-    id: 3,
-    user: {
-      name: 'Anna Garcia',
-      avatar: 'https://randomuser.me/api/portraits/women/63.jpg'
-    },
-    type: 'file_upload',
-    content: 'Uploaded document',
-    target: 'UX Research Results.pdf',
-    time: '2 hours ago',
-    link: '/projects/2/files'
-  },
-  {
-    id: 4,
-    user: {
-      name: 'David Kim',
-      avatar: 'https://randomuser.me/api/portraits/men/46.jpg'
-    },
-    type: 'project',
-    content: 'Created new project',
-    target: 'Mobile App Development',
-    time: 'Yesterday',
-    link: '/projects/2'
-  },
-  {
-    id: 5,
-    user: {
-      name: 'Lisa Wong',
-      avatar: 'https://randomuser.me/api/portraits/women/33.jpg'
-    },
-    type: 'task_assigned',
-    content: 'Assigned you to',
-    target: 'Review PR for Homepage',
-    time: 'Yesterday',
-    link: '/projects/3/tasks/44'
-  }
-];
+import { getRecentActivity } from '../../services/activityService';
+import { Link } from 'react-router-dom';
 
 const RecentActivityCard = () => {
+  const [activities, setActivities] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchActivities = async () => {
+      setLoading(true);
+      const { activities: realActivities } = await getRecentActivity();
+      setActivities(realActivities);
+      setLoading(false);
+    };
+
+    fetchActivities();
+  }, []);
+
   // Function to get the icon for each activity type
   const getActivityIcon = (type) => {
     switch (type) {
@@ -130,43 +82,49 @@ const RecentActivityCard = () => {
       <div className="px-6 py-5 border-b border-gray-200 dark:border-gray-700">
         <h3 className="text-lg font-medium text-gray-900 dark:text-white">Recent Activity</h3>
       </div>
-      
+
       <div className="divide-y divide-gray-200 dark:divide-gray-700">
-        {sampleActivities.map((activity) => (
-          <div key={activity.id} className="px-6 py-4 hover:bg-gray-50 dark:hover:bg-gray-750 transition-colors">
-            <a href={activity.link} className="flex items-start space-x-4">
-              {/* User avatar */}
-              <div className="flex-shrink-0">
-                <img 
-                  src={activity.user.avatar} 
-                  alt={activity.user.name}
-                  className="h-10 w-10 rounded-full" 
-                />
-              </div>
-              
-              {/* Activity content */}
-              <div className="flex-1 min-w-0">
-                <p className="text-sm text-gray-900 dark:text-white">
-                  <span className="font-medium">{activity.user.name}</span>
-                  {' '}
-                  <span className="text-gray-500 dark:text-gray-400">{activity.content}</span>
-                  {' '}
-                  <span className="font-medium">{activity.target}</span>
-                </p>
-                <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
-                  {activity.time}
-                </p>
-              </div>
-              
-              {/* Activity icon */}
-              <div className="flex-shrink-0">
-                {getActivityIcon(activity.type)}
-              </div>
-            </a>
-          </div>
-        ))}
+        {loading ? (
+          <div className="p-8 text-center text-sm text-gray-500">Loading activity...</div>
+        ) : activities.length === 0 ? (
+          <div className="p-8 text-center text-sm text-gray-500">No recent activity found.</div>
+        ) : (
+          activities.map((activity) => (
+            <div key={activity.id} className="px-6 py-4 hover:bg-gray-50 dark:hover:bg-gray-750 transition-colors">
+              <Link to={activity.link || '#'} className="flex items-start space-x-4">
+                {/* User avatar */}
+                <div className="flex-shrink-0">
+                  <img 
+                    src={activity.user?.avatar}
+                    alt={activity.user?.name}
+                    className="h-10 w-10 rounded-full object-cover"
+                  />
+                </div>
+
+                {/* Activity content */}
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm text-gray-900 dark:text-white">
+                    <span className="font-medium">{activity.user?.name}</span>
+                    {' '}
+                    <span className="text-gray-500 dark:text-gray-400">{activity.content}</span>
+                    {' '}
+                    <span className="font-medium">{activity.target}</span>
+                  </p>
+                  <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
+                    {activity.timeStr}
+                  </p>
+                </div>
+
+                {/* Activity icon */}
+                <div className="flex-shrink-0">
+                  {getActivityIcon(activity.type)}
+                </div>
+              </Link>
+            </div>
+          ))
+        )}
       </div>
-      
+
       <div className="px-6 py-4 bg-gray-50 dark:bg-gray-750 text-center">
         <a 
           href="/activity"

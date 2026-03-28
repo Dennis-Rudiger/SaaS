@@ -67,7 +67,7 @@ export const updateUserProfile = async (userId, profileData) => {
         last_name: profileData.last_name,
         avatar_url: profileData.avatar_url,
         title: profileData.title,
-        company: profileData.company,
+        company: profileData.company, phone: profileData.phone, bio: profileData.bio,
         updated_at: new Date()
       })
       .eq('id', userId)

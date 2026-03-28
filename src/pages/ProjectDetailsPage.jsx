@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useParams, Link } from 'react-router-dom';
+import { useParams, Link, useNavigate } from 'react-router-dom';
 import { getProject, updateProject, deleteProject } from '../services/projectService';
 import DashboardLayout from '../components/dashboard/DashboardLayout';
 import DashboardHeader from '../components/dashboard/DashboardHeader';
@@ -9,6 +9,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 
 const ProjectDetailsPage = () => {
   const { projectId } = useParams();
+  const navigate = useNavigate();
   const [project, setProject] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -60,8 +61,8 @@ const ProjectDetailsPage = () => {
       }
       
       if (success) {
-        // Navigate back to projects page
-        window.location.href = '/projects';
+        // Navigate back to projects page gracefully
+        navigate('/projects');
       }
     } catch (error) {
       console.error('Error deleting project:', error);

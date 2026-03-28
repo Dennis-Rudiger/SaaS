@@ -1,99 +1,48 @@
-import React, { useState } from 'react';
+﻿import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { eventService } from '../../services/eventService';
 
-const events = [
-  {
-    id: 1,
-    title: 'Team Weekly Sync',
-    date: '2023-07-25',
-    time: '10:00 AM',
-    duration: '1h',
-    attendees: [
-      {
-        name: 'Alex Johnson',
-        avatar: 'https://randomuser.me/api/portraits/men/32.jpg',
-      },
-      {
-        name: 'Maria Garcia',
-        avatar: 'https://randomuser.me/api/portraits/women/68.jpg',
-      },
-      {
-        name: 'James Wilson',
-        avatar: 'https://randomuser.me/api/portraits/men/46.jpg',
-      },
-      {
-        name: 'Emily Chen',
-        avatar: 'https://randomuser.me/api/portraits/women/32.jpg',
-      },
-    ],
-  },
-  {
-    id: 2,
-    title: 'Client Review Meeting',
-    date: '2023-07-25',
-    time: '2:30 PM',
-    duration: '1.5h',
-    attendees: [
-      {
-        name: 'Alex Johnson',
-        avatar: 'https://randomuser.me/api/portraits/men/32.jpg',
-      },
-      {
-        name: 'Maria Garcia',
-        avatar: 'https://randomuser.me/api/portraits/women/68.jpg',
-      },
-    ],
-  },
-  {
-    id: 3,
-    title: 'Product Launch Planning',
-    date: '2023-07-26',
-    time: '11:00 AM',
-    duration: '2h',
-    attendees: [
-      {
-        name: 'James Wilson',
-        avatar: 'https://randomuser.me/api/portraits/men/46.jpg',
-      },
-      {
-        name: 'Emily Chen',
-        avatar: 'https://randomuser.me/api/portraits/women/32.jpg',
-      },
-      {
-        name: 'Alex Johnson',
-        avatar: 'https://randomuser.me/api/portraits/men/32.jpg',
-      },
-    ],
-  },
-  {
-    id: 4,
-    title: 'Q3 Budget Review',
-    date: '2023-07-28',
-    time: '9:00 AM',
-    duration: '1h',
-    attendees: [
-      {
-        name: 'Maria Garcia',
-        avatar: 'https://randomuser.me/api/portraits/women/68.jpg',
-      },
-      {
-        name: 'Alex Johnson',
-        avatar: 'https://randomuser.me/api/portraits/men/32.jpg',
-      },
-    ],
-  },
-];
-
-const UpcomingEvents = () => {
+const UpcomingEvents = ({ refreshTrigger = 0 }) => {
+  const [events, setEvents] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [displayCount, setDisplayCount] = useState(3);
   const [showAllEvents, setShowAllEvents] = useState(false);
-  
+
+  useEffect(() => {
+    const fetchEvents = async () => {
+      setLoading(true);
+      try {
+        const data = await eventService.getEvents();
+        // Filter events from today onwards
+        const now = new Date();
+        const upcoming = data.filter(e => new Date(e.start_time) >= now.setHours(0,0,0,0));
+        setEvents(upcoming);
+      } catch (error) {
+        console.error('Error fetching events:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchEvents();
+  }, [refreshTrigger]);
+
   const formatDate = (dateString) => {
     const options = { weekday: 'short', month: 'short', day: 'numeric' };
     return new Date(dateString).toLocaleDateString('en-US', options);
   };
-  
-  // Calculate if the event is today
+
+  const formatTime = (dateString) => {
+    return new Date(dateString).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
+  };
+
+  const getDuration = (start, end) => {
+    const diffMs = new Date(end) - new Date(start);
+    const diffHrs = diffMs / (1000 * 60 * 60);
+    if (diffHrs < 1) return `${(diffHrs * 60).toFixed(0)}m`;
+    return `${diffHrs % 1 === 0 ? diffHrs : diffHrs.toFixed(1)}h`;
+  };
+
   const isToday = (dateString) => {
     const today = new Date();
     const eventDate = new Date(dateString);
@@ -102,7 +51,7 @@ const UpcomingEvents = () => {
 
   // Group events by date
   const eventsByDate = events.reduce((acc, event) => {
-    const date = event.date;
+    const date = new Date(event.start_time).toISOString().split('T')[0];
     if (!acc[date]) {
       acc[date] = [];
     }
@@ -111,10 +60,10 @@ const UpcomingEvents = () => {
   }, {});
 
   const sortedDates = Object.keys(eventsByDate).sort((a, b) => new Date(a) - new Date(b));
-  const displayEvents = showAllEvents ? sortedDates : sortedDates.slice(0, displayCount);
+  const displayDates = showAllEvents ? sortedDates : sortedDates.slice(0, displayCount);
 
   return (
-    <motion.div 
+    <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: 20 }}
@@ -131,56 +80,61 @@ const UpcomingEvents = () => {
         </div>
       </div>
       <div className="p-6">
-        <div className="space-y-6">
-          {displayEvents.map((date) => (
-            <div key={date}>
-              <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
-                {isToday(date) ? 'Today' : formatDate(date)}
-              </h3>
-              {eventsByDate[date].map((event) => (
-                <div key={event.id} className="border-l-4 border-primary pl-4 mt-2">
-                  <div className="flex items-center justify-between">
-                    <h4 className="text-base font-semibold text-gray-900 dark:text-white">
-                      {event.title}
-                    </h4>
-                    <span className="text-xs text-gray-500 dark:text-gray-400">
-                      {event.time} ({event.duration})
-                    </span>
-                  </div>
-                  <div className="mt-2 flex items-center">
-                    <div className="flex -space-x-2 mr-2">
-                      {event.attendees.slice(0, 3).map((attendee, index) => (
-                        <img 
-                          key={index}
-                          src={attendee.avatar} 
-                          alt={attendee.name} 
-                          className="w-6 h-6 rounded-full border border-white dark:border-gray-800"
-                          title={attendee.name}
-                        />
-                      ))}
-                      {event.attendees.length > 3 && (
-                        <div className="w-6 h-6 rounded-full bg-gray-200 dark:bg-gray-600 border border-white dark:border-gray-800 flex items-center justify-center text-xs text-gray-600 dark:text-gray-300 font-medium">
-                          +{event.attendees.length - 3}
+        {loading ? (
+          <div className="flex justify-center py-4">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+          </div>
+        ) : events.length === 0 ? (
+          <div className="text-center py-4 text-gray-500 dark:text-gray-400">
+            No upcoming events found.
+          </div>
+        ) : (
+          <>
+            <div className="space-y-6">
+              {displayDates.map((date) => (
+                <div key={date}>
+                  <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
+                    {isToday(date) ? 'Today' : formatDate(date)}
+                  </h3>
+                  <div className="space-y-3">
+                    {eventsByDate[date].map((event) => (
+                      <div key={event.id} className="border-l-4 border-primary pl-4 py-1">
+                        <div className="flex items-center justify-between">
+                          <h4 className="text-base font-semibold text-gray-900 dark:text-white">
+                            {event.title}
+                          </h4>
+                          <span className="text-xs text-gray-500 dark:text-gray-400">
+                            {formatTime(event.start_time)} ({getDuration(event.start_time, event.end_time)})
+                          </span>
                         </div>
-                      )}
-                    </div>
-                    <span className="text-xs text-gray-500 dark:text-gray-400">
-                      {event.attendees.length} attendees
-                    </span>
+                        {event.project && (
+                          <div className="mt-1 text-sm text-primary dark:text-primary-light">
+                            {event.project.name}
+                          </div>
+                        )}
+                        {event.description && (
+                          <p className="mt-1 text-sm text-gray-600 dark:text-gray-300 line-clamp-2">
+                            {event.description}
+                          </p>
+                        )}
+                      </div>
+                    ))}
                   </div>
                 </div>
               ))}
             </div>
-          ))}
-        </div>
-        <div className="mt-4">
-          <button 
-            className="w-full py-2 bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 text-sm font-medium rounded-md hover:bg-gray-200 dark:hover:bg-gray-600 transition"
-            onClick={() => setShowAllEvents(!showAllEvents)}
-          >
-            {showAllEvents ? 'Show Less' : 'Show More'}
-          </button>
-        </div>
+            {sortedDates.length > displayCount && (
+              <div className="mt-6">
+                <button
+                  className="w-full py-2 bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 text-sm font-medium rounded-md hover:bg-gray-200 dark:hover:bg-gray-600 transition"
+                  onClick={() => setShowAllEvents(!showAllEvents)}
+                >
+                  {showAllEvents ? 'Show Less' : 'Show More'}
+                </button>
+              </div>
+            )}
+          </>
+        )}
       </div>
     </motion.div>
   );

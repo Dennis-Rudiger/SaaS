@@ -1,12 +1,34 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import DashboardLayout from '../layouts/DashboardLayout';
 import Calendar from '../components/dashboard/Calendar';
 import UpcomingEvents from '../components/dashboard/UpcomingEvents';
-import { motion } from 'framer-motion';
+import EventForm from '../components/dashboard/EventForm';
+import { motion, AnimatePresence } from 'framer-motion';
 
-const CalendarPage = () => {
+const CalendarPage = ({ openNew = false }) => {
   const [view, setView] = useState('month');
-  
+  const [isEventFormOpen, setIsEventFormOpen] = useState(false);
+  const [refreshTrigger, setRefreshTrigger] = useState(0);
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (openNew) {
+      setIsEventFormOpen(true);
+    }
+  }, [openNew]);
+
+  const handleCloseEventForm = () => {
+    setIsEventFormOpen(false);
+    if (openNew) {
+      navigate('/calendar', { replace: true });
+    }
+  };
+
+  const handleEventSuccess = () => {
+    setRefreshTrigger(prev => prev + 1);
+  };
+
   return (
     <DashboardLayout>
       <div className="py-6">
@@ -38,25 +60,37 @@ const CalendarPage = () => {
                 ))}
               </div>
               
-              <button className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-primary hover:bg-primary-dark focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary">
-                <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+              <button 
+                onClick={() => setIsEventFormOpen(true)}
+                className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-primary hover:bg-primary-dark focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary"
+              >
+                <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">  
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
                 </svg>
                 New Event
               </button>
             </div>
           </div>
-          
+
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             <div className="lg:col-span-2">
-              <Calendar />
+              <Calendar refreshTrigger={refreshTrigger} />
             </div>
             <div>
-              <UpcomingEvents />
+              <UpcomingEvents refreshTrigger={refreshTrigger} />
             </div>
           </div>
         </div>
       </div>
+
+      <AnimatePresence>
+        {isEventFormOpen && (
+          <EventForm 
+            onClose={handleCloseEventForm} 
+            onSuccess={handleEventSuccess}
+          />
+        )}
+      </AnimatePresence>
     </DashboardLayout>
   );
 };

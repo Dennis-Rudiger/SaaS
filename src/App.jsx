@@ -20,7 +20,9 @@ import BillingPage from './pages/BillingPage';
 import NotFoundPage from './pages/NotFoundPage';
 import ProjectsPage from './pages/ProjectsPage';
 import CalendarPage from './pages/CalendarPage';
+import TeamPage from './pages/TeamPage';
 import ProjectDetailsPage from './pages/ProjectDetailsPage';
+import DocumentsPage from './pages/DocumentsPage';
 import DemoPage from './pages/DemoPage'; // Import the new DemoPage
 import TutorialsPage from './pages/TutorialsPage';
 import CommunityPage from './pages/CommunityPage';
@@ -102,9 +104,19 @@ function App() {
 
               {/* Protected routes requiring subscription */}
               <Route path="/projects" element={<ProtectedRoute><SubscriptionGuard><ProjectsPage /></SubscriptionGuard></ProtectedRoute>} />
+              <Route path="/projects/new" element={<ProtectedRoute><SubscriptionGuard><ProjectsPage openNew={true} /></SubscriptionGuard></ProtectedRoute>} />
               <Route path="/projects/:projectId" element={<ProtectedRoute><SubscriptionGuard><ProjectDetailsPage /></SubscriptionGuard></ProtectedRoute>} />
+              
               <Route path="/calendar" element={<ProtectedRoute><SubscriptionGuard><CalendarPage /></SubscriptionGuard></ProtectedRoute>} />
+              <Route path="/calendar/new" element={<ProtectedRoute><SubscriptionGuard><CalendarPage openNew={true} /></SubscriptionGuard></ProtectedRoute>} />
+              
+              <Route path="/team" element={<ProtectedRoute><SubscriptionGuard><TeamPage /></SubscriptionGuard></ProtectedRoute>} />
+              <Route path="/team/new" element={<ProtectedRoute><SubscriptionGuard><TeamPage openNew={true} /></SubscriptionGuard></ProtectedRoute>} />
+              
               <Route path="/tasks" element={<ProtectedRoute><SubscriptionGuard><DashboardPage /></SubscriptionGuard></ProtectedRoute>} />
+              <Route path="/tasks/new" element={<ProtectedRoute><SubscriptionGuard><DashboardPage openNewTask={true} /></SubscriptionGuard></ProtectedRoute>} />
+              <Route path="/documents" element={<ProtectedRoute><SubscriptionGuard><DocumentsPage /></SubscriptionGuard></ProtectedRoute>} />
+              <Route path="/documents/new" element={<ProtectedRoute><SubscriptionGuard><DocumentsPage /></SubscriptionGuard></ProtectedRoute>} />
 
               {/* Demo Page */}
               <Route path="/demo" element={<DemoPage />} />

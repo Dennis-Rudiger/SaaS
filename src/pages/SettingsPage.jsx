@@ -1,7 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import DashboardLayout from '../layouts/DashboardLayout';
+import { useAuth } from '../contexts/AuthContext';
+import { getUserProfile, updateUserProfile } from '../services/profileService';
 
 const SettingsPage = () => {
+  const { user } = useAuth();
   const [activeTab, setActiveTab] = useState('profile');
   const [userData, setUserData] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -32,28 +35,30 @@ const SettingsPage = () => {
     weeklyDigest: false,
     marketingEmails: false,
   });
-  
+
   // Load user data on component mount
   useEffect(() => {
     const fetchUserData = async () => {
       try {
-        // In a real application, this would be an API call
-        // For now, we'll simulate with localStorage
-        const storedUserData = localStorage.getItem('userData');
+        if (!user) return;
         
-        if (storedUserData) {
-          const parsedUserData = JSON.parse(storedUserData);
-          setUserData(parsedUserData);
+        const { data: profile } = await getUserProfile(user.id);
+
+        if (profile) {
+          setUserData(profile);
           setProfileData({
-            firstName: parsedUserData.firstName || '',
-            lastName: parsedUserData.lastName || '',
-            email: parsedUserData.email || '',
-            jobTitle: parsedUserData.jobTitle || '',
-            company: parsedUserData.company || '',
-            phone: parsedUserData.phone || '',
-            bio: parsedUserData.bio || '',
-            avatar: parsedUserData.avatar || '',
+            firstName: profile.first_name || '',
+            lastName: profile.last_name || '',
+            email: user.email || '',
+            jobTitle: profile.title || '',
+            company: profile.company || '',
+            phone: profile.phone || '',
+            bio: profile.bio || '',
+            avatar: profile.avatar_url || '',
           });
+        } else {
+          // Keep defaults but show email
+          setProfileData(prev => ({...prev, email: user.email || ''}));
         }
       } catch (error) {
         console.error('Error fetching user data:', error);
@@ -62,10 +67,10 @@ const SettingsPage = () => {
         setIsLoading(false);
       }
     };
-    
+
     fetchUserData();
-  }, []);
-  
+  }, [user]);
+
   const handleProfileChange = (e) => {
     const { name, value } = e.target;
     setProfileData(prev => ({ ...prev, [name]: value }));
@@ -85,16 +90,24 @@ const SettingsPage = () => {
     e.preventDefault();
     setIsSaving(true);
     setMessage({ type: '', text: '' });
-    
+
     try {
-      // In a real application, this would be an API call
-      // For now, we'll simulate with localStorage
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      if (!user) throw new Error('Not authenticated');
       
-      const updatedUserData = { ...userData, ...profileData };
-      localStorage.setItem('userData', JSON.stringify(updatedUserData));
-      setUserData(updatedUserData);
+      const payload = {
+        first_name: profileData.firstName,
+        last_name: profileData.lastName,
+        title: profileData.jobTitle,
+        company: profileData.company,
+        phone: profileData.phone,
+        bio: profileData.bio,
+        avatar_url: profileData.avatar
+      };
+
+      const { data, error } = await updateUserProfile(user.id, payload);
       
+      if (error) throw error;
+
       setMessage({ type: 'success', text: 'Profile updated successfully!' });
     } catch (error) {
       console.error('Error updating profile:', error);
@@ -103,7 +116,7 @@ const SettingsPage = () => {
       setIsSaving(false);
     }
   };
-  
+
   const handlePasswordSubmit = async (e) => {
     e.preventDefault();
     setIsSaving(true);

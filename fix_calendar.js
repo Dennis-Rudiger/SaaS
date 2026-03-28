@@ -1,4 +1,6 @@
-import React, { useState, useEffect } from 'react';
+﻿const fs = require('fs');
+
+const content = import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { eventService } from '../../services/eventService';
 
@@ -6,18 +8,18 @@ import { eventService } from '../../services/eventService';
 const generateCalendarDays = (year, month) => {
   const firstDay = new Date(year, month, 1).getDay();
   const daysInMonth = new Date(year, month + 1, 0).getDate();
-  
+
   const days = [];
   // Add empty slots for days before the first of the month
   for (let i = 0; i < firstDay; i++) {
     days.push({ day: '', isCurrentMonth: false });
   }
-  
+
   // Add days of the current month
   for (let i = 1; i <= daysInMonth; i++) {
     days.push({ day: i, isCurrentMonth: true });
   }
-  
+
   return days;
 };
 
@@ -46,7 +48,7 @@ const Calendar = ({ refreshTrigger = 0 }) => {
 
   const days = generateCalendarDays(currentYear, currentMonth);
   const monthName = new Date(currentYear, currentMonth).toLocaleString('default', { month: 'long' });
-  
+
   const goToPreviousMonth = () => {
     if (currentMonth === 0) {
       setCurrentMonth(11);
@@ -55,7 +57,7 @@ const Calendar = ({ refreshTrigger = 0 }) => {
       setCurrentMonth(currentMonth - 1);
     }
   };
-  
+
   const goToNextMonth = () => {
     if (currentMonth === 11) {
       setCurrentMonth(0);
@@ -64,7 +66,7 @@ const Calendar = ({ refreshTrigger = 0 }) => {
       setCurrentMonth(currentMonth + 1);
     }
   };
-  
+
   const getEventsForDay = (day) => {
     return events.filter(event => {
       const eventDate = new Date(event.start_time);
@@ -73,8 +75,7 @@ const Calendar = ({ refreshTrigger = 0 }) => {
              eventDate.getFullYear() === currentYear;
     });
   };
-  
-  // Simple string hashing to pick consistent color per event type/title
+
   const getEventColorStyle = (title) => {
     const lower = title.toLowerCase();
     if (lower.includes('meeting') || lower.includes('sync') || lower.includes('call')) {
@@ -97,9 +98,9 @@ const Calendar = ({ refreshTrigger = 0 }) => {
         <div className="flex items-center justify-between">
           <h2 className="text-xl font-semibold text-gray-800 dark:text-white">Calendar</h2>
           <div className="flex items-center space-x-2">
-            <button 
+            <button
               onClick={goToPreviousMonth}
-              className="p-1 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-primary"
+              className="p-1 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-primary"   
             >
               <svg className="w-5 h-5 text-gray-600 dark:text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
@@ -108,9 +109,9 @@ const Calendar = ({ refreshTrigger = 0 }) => {
             <span className="text-gray-600 dark:text-gray-300 font-medium">
               {monthName} {currentYear}
             </span>
-            <button 
+            <button
               onClick={goToNextMonth}
-              className="p-1 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-primary"
+              className="p-1 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-primary"   
             >
               <svg className="w-5 h-5 text-gray-600 dark:text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
@@ -119,9 +120,8 @@ const Calendar = ({ refreshTrigger = 0 }) => {
           </div>
         </div>
       </div>
-      
+
       <div className="p-4">
-        {/* Days of week headers */}
         <div className="grid grid-cols-7 gap-1 mb-2">
           {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map((day, index) => (
             <div key={index} className="text-center text-xs font-medium text-gray-500 dark:text-gray-400 py-1">
@@ -130,38 +130,34 @@ const Calendar = ({ refreshTrigger = 0 }) => {
           ))}
         </div>
         
-        {/* Calendar days */}
         <div className="grid grid-cols-7 gap-1">
           {days.map((dayObj, index) => {
-            const isToday = dayObj.isCurrentMonth && dayObj.day === today.getDate() && 
+            const isToday = dayObj.isCurrentMonth && dayObj.day === today.getDate() &&
                            currentMonth === today.getMonth() && currentYear === today.getFullYear();
-            const dayEvents = dayObj.isCurrentMonth ? getEventsForDay(dayObj.day) : [];
             
+            const dayEvents = dayObj.isCurrentMonth ? getEventsForDay(dayObj.day) : [];
+
             return (
               <div
                 key={index}
-                className={`relative h-24 p-1 border dark:border-gray-700 overflow-y-auto ${
-                  dayObj.isCurrentMonth ? 'bg-white dark:bg-gray-800' : 'bg-gray-50 dark:bg-gray-700/30'
-                } ${isToday ? 'ring-2 ring-primary' : ''}`}
+                className={\elative h-24 p-1 border dark:border-gray-700 overflow-y-auto \ \\}
               >
-                <span 
-                  className={`text-sm ${
-                    isToday 
-                      ? 'bg-primary text-white w-6 h-6 flex items-center justify-center rounded-full' 
-                      : dayObj.isCurrentMonth ? 'text-gray-900 dark:text-white' : 'text-gray-400 dark:text-gray-500'
-                  }`}
-                >
-                  {dayObj.day}
-                </span>
-                
+                <div className="flex justify-start">
+                  <span 
+                    className={\	ext-sm \\}
+                  >
+                    {dayObj.day}
+                  </span>
+                </div>
+
                 <div className="mt-1 space-y-1">
                   {dayEvents.map(event => (
                     <div
-                      key={event.id || index + event.title}
-                      className={`text-xs p-1 rounded truncate ${getEventColorStyle(event.title || '')}`}
+                      key={event.id}
+                      className={\	ext-xs p-1 rounded truncate \\}
                       title={event.title}
                     >
-                      {new Date(event.start_time).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})} - {event.title}
+                      {event.title}
                     </div>
                   ))}
                 </div>
@@ -170,24 +166,21 @@ const Calendar = ({ refreshTrigger = 0 }) => {
           })}
         </div>
       </div>
-      
+
       <div className="px-6 py-4 border-t border-gray-200 dark:border-gray-700">
         <div className="flex flex-wrap gap-4">
           <div className="flex items-center">
             <span className="w-3 h-3 bg-blue-500 dark:bg-blue-600 rounded-full mr-2"></span>
-            <span className="text-xs text-gray-600 dark:text-gray-300">Meeting</span>
+            <span className="text-xs text-gray-600 dark:text-gray-300">Meeting / Call</span>
           </div>
           <div className="flex items-center">
             <span className="w-3 h-3 bg-green-500 dark:bg-green-600 rounded-full mr-2"></span>
-            <span className="text-xs text-gray-600 dark:text-gray-300">Call</span>
+            <span className="text-xs text-gray-600 dark:text-gray-300">Other / Routine</span>
           </div>
           <div className="flex items-center">
             <span className="w-3 h-3 bg-red-500 dark:bg-red-600 rounded-full mr-2"></span>
-            <span className="text-xs text-gray-600 dark:text-gray-300">Deadline</span>
+            <span className="text-xs text-gray-600 dark:text-gray-300">Deadline / Launch</span>
           </div>
-          <button className="ml-auto text-sm text-primary hover:text-primary-dark">
-            Add Event
-          </button>
         </div>
       </div>
     </motion.div>
@@ -195,3 +188,6 @@ const Calendar = ({ refreshTrigger = 0 }) => {
 };
 
 export default Calendar;
+
+
+fs.writeFileSync('src/components/dashboard/Calendar.jsx', content, 'utf8');

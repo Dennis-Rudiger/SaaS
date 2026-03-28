@@ -41,7 +41,9 @@ const sampleProjects = [
   }
 ];
 
-const ProjectsOverviewCard = () => {
+const ProjectsOverviewCard = ({ projects = [] }) => {
+  const displayProjects = projects.length > 0 ? projects.slice(0, 3) : sampleProjects;
+
   const getStatusBadgeClass = (status) => {
     switch (status) {
       case 'Completed':
@@ -79,46 +81,54 @@ const ProjectsOverviewCard = () => {
         </Link>
       </div>
       <div className="divide-y divide-gray-200 dark:divide-gray-700">
-        {sampleProjects.map((project) => (
+        {displayProjects.map((project) => (
           <div key={project.id} className="px-6 py-4 hover:bg-gray-50 dark:hover:bg-gray-750 transition-colors">
             <Link to={`/projects/${project.id}`} className="block">
               <div className="flex items-center justify-between mb-2">
                 <h4 className="text-base font-medium text-gray-900 dark:text-white">
                   {project.name}
                 </h4>
-                <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusBadgeClass(project.status)}`}>
-                  {project.status}
+                <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusBadgeClass(project.status || 'In Progress')}`}>
+                  {project.status || 'Active'}
                 </span>
               </div>
               <div className="flex items-center justify-between mb-2">
                 <div className="flex -space-x-2 overflow-hidden">
-                  {project.team.slice(0, 3).map((member) => (
+                  {(project.team || []).slice(0, 3).map((member, index) => (
                     <img 
-                      key={member.id}
+                      key={member.id || index}
                       className="inline-block h-6 w-6 rounded-full ring-2 ring-white dark:ring-gray-800" 
-                      src={member.avatar} 
-                      alt={member.name} 
+                      src={member.avatar || 'https://ui-avatars.com/api/?name='+encodeURIComponent(member.name || 'User')+'&background=random'} 
+                      alt={member.name || 'Team member'} 
                     />
                   ))}
-                  {project.team.length > 3 && (
+                  {(project.team || []).length > 3 && (
                     <span className="flex items-center justify-center h-6 w-6 rounded-full bg-gray-200 dark:bg-gray-700 text-xs font-medium text-gray-700 dark:text-gray-300 ring-2 ring-white dark:ring-gray-800">
-                      +{project.team.length - 3}
+                      +{(project.team || []).length - 3}
                     </span>
                   )}
                 </div>
-                <span className="text-xs text-gray-500 dark:text-gray-400">
-                  Due {formatDate(project.dueDate)}
-                </span>
+                {project.dueDate && (
+                  <span className="text-xs text-gray-500 dark:text-gray-400">
+                    Due {formatDate(project.dueDate)}
+                  </span>
+                )}
               </div>
               <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
                 <div 
                   className="bg-primary h-2 rounded-full" 
-                  style={{ width: `${project.progress}%` }}
+                  style={{ width: `${project.progress || 0}%` }}
                 ></div>
               </div>
             </Link>
           </div>
         ))}
+        
+        {displayProjects.length === 0 && projects.length === 0 && (
+           <div className="px-6 py-8 text-center text-gray-500 dark:text-gray-400">
+             You haven't created any projects yet.
+           </div>
+        )}
       </div>
       <div className="px-6 py-4 bg-gray-50 dark:bg-gray-750 text-center">
         <Link 

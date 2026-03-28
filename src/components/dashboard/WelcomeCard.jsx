@@ -1,11 +1,31 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
+import { useAuth } from '../../contexts/AuthContext';
 
 const WelcomeCard = ({ profile }) => {
-  // Check if it's the first time the user is logging in (first-time user experience)
-  const isFirstTimeUser = !profile || !profile.last_login;
+  const { user } = useAuth();
   
+  // Calculate profile completion
+  const calculateCompletion = () => {
+    if (!profile) return 10;
+    
+    let score = 0;
+    if (user?.email) score += 20; // Having an account gives 20%
+    if (profile.first_name) score += 20;
+    if (profile.last_name) score += 20;
+    if (profile.title) score += 20;
+    if (profile.company) score += 20;
+    
+    return score;
+  };
+  
+  const completionScore = calculateCompletion();
+  const isFirstTimeUser = completionScore < 100;
+  
+  // Get display name
+  const displayName = profile?.first_name || user?.email || 'there';
+
   return (
     <motion.div 
       className="mb-6 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm overflow-hidden"
@@ -15,37 +35,37 @@ const WelcomeCard = ({ profile }) => {
     >
       <div className="relative">
         {/* Background gradient */}
-        <div className="absolute inset-0 bg-gradient-to-r from-primary/10 to-blue-500/10 dark:from-primary/20 dark:to-blue-500/20" />
+        <div className="absolute inset-0 bg-gradient-to-r from-primary/10 to-blue-500/10 dark:from-primary/20 dark:to-blue-500/20" />    
         
         <div className="relative p-6">
           <div className="md:flex md:items-center md:justify-between">
             <div className="md:flex-1">
               <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
-                {isFirstTimeUser 
-                  ? `Welcome, ${profile?.first_name || 'there'}!` 
-                  : `Welcome back, ${profile?.first_name || 'there'}!`
+                {isFirstTimeUser
+                  ? `Welcome, ${displayName}!`
+                  : `Welcome back, ${displayName}!`
                 }
               </h2>
-              
+
               <p className="mt-2 text-base text-gray-600 dark:text-gray-300">
-                {isFirstTimeUser 
-                  ? "Let's get you started with your new account." 
+                {isFirstTimeUser
+                  ? "Let's get you started with your new account."
                   : "Here's a summary of your recent activity."
                 }
               </p>
             </div>
-            
+
             <div className="mt-4 md:mt-0 md:ml-6 flex flex-shrink-0 space-x-3">
               {isFirstTimeUser ? (
                 <>
                   <Link
-                    to="/onboarding"
+                    to="/settings"
                     className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-primary hover:bg-primary-dark focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary"
                   >
                     Complete Setup
                   </Link>
                   <Link
-                    to="/tutorial"
+                    to="/tutorials"
                     className="inline-flex items-center px-4 py-2 border border-gray-300 dark:border-gray-600 text-sm font-medium rounded-md text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary"
                   >
                     Watch Tutorial
@@ -71,9 +91,9 @@ const WelcomeCard = ({ profile }) => {
         <div className="bg-gray-50 dark:bg-gray-750 px-6 py-3">
           <div className="flex items-center text-sm">
             <div className="w-full bg-gray-200 dark:bg-gray-600 rounded-full h-2.5 mr-4">
-              <div className="bg-primary h-2.5 rounded-full" style={{ width: '10%' }}></div>
+              <div className="bg-primary h-2.5 rounded-full" style={{ width: `${completionScore}%` }}></div>
             </div>
-            <span className="text-gray-600 dark:text-gray-400 whitespace-nowrap">Profile completion: 10%</span>
+            <span className="text-gray-600 dark:text-gray-400 whitespace-nowrap">Profile completion: {completionScore}%</span>
           </div>
         </div>
       )}

@@ -30,6 +30,8 @@ CREATE TABLE IF NOT EXISTS public.subscriptions (
   tier_id UUID REFERENCES public.subscription_tiers(id) NOT NULL,
   status TEXT NOT NULL,
   paypal_subscription_id TEXT,
+  stripe_subscription_id TEXT,
+  trial_end TIMESTAMP WITH TIME ZONE,
   current_period_start TIMESTAMP WITH TIME ZONE,
   current_period_end TIMESTAMP WITH TIME ZONE,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
@@ -156,24 +158,27 @@ ALTER TABLE public.event_attendees ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.documents ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.subscriptions ENABLE ROW LEVEL SECURITY;
 
--- Update subscription_tiers table
+-- Ensure correct columns exist
 ALTER TABLE IF EXISTS public.subscription_tiers 
-DROP COLUMN IF EXISTS stripe_price_id;
+ADD COLUMN IF NOT EXISTS stripe_price_id TEXT;
 
 ALTER TABLE IF EXISTS public.subscription_tiers 
 ADD COLUMN IF NOT EXISTS paypal_plan_id TEXT;
 
 -- Update subscriptions table
 ALTER TABLE IF EXISTS public.subscriptions 
-DROP COLUMN IF EXISTS stripe_subscription_id;
+ADD COLUMN IF NOT EXISTS stripe_subscription_id TEXT;
 
 ALTER TABLE IF EXISTS public.subscriptions 
 ADD COLUMN IF NOT EXISTS paypal_subscription_id TEXT;
 
+ALTER TABLE IF EXISTS public.subscriptions 
+ADD COLUMN IF NOT EXISTS trial_end TIMESTAMP WITH TIME ZONE;
+
 -- Insert sample data into subscription_tiers
-INSERT INTO public.subscription_tiers (name, description, price, billing_period, features, paypal_plan_id)
+INSERT INTO public.subscription_tiers (name, description, price, billing_period, features, stripe_price_id, paypal_plan_id)
 VALUES 
-('Starter', 'Basic features for small teams', 0, 'monthly', '{"projects": 3, "users": 5, "storage": "1GB"}', NULL),
-('Pro', 'Advanced features for growing businesses', 49, 'monthly', '{"projects": 50, "users": 25, "storage": "100GB", "priority_support": true}', 'YOUR_PAYPAL_PRO_PLAN_ID'),
-('Enterprise', 'Custom solutions for large organizations', 99, 'monthly', '{"projects": "Unlimited", "users": "Unlimited", "storage": "1TB", "dedicated_support": true, "sso": true}', 'YOUR_PAYPAL_ENTERPRISE_PLAN_ID')
-ON CONFLICT (name) DO NOTHING;
+('Starter', 'Basic features for small teams', 0, 'monthly', '{"projects": 3, "users": 5, "storage": "1GB"}', 'price_starter_monthly', NULL),
+('Pro', 'Advanced features for growing businesses', 49, 'monthly', '{"projects": 50, "users": 25, "storage": "100GB", "priority_support": true}', 'price_pro_monthly', 'YOUR_PAYPAL_PRO_PLAN_ID'),
+('Enterprise', 'Custom solutions for large organizations', 99, 'monthly', '{"projects": "Unlimited", "users": "Unlimited", "storage": "1TB", "dedicated_support": true, "sso": true}', 'price_enterprise_monthly', 'YOUR_PAYPAL_ENTERPRISE_PLAN_ID')
+ON CONFLICT (id) DO NOTHING;

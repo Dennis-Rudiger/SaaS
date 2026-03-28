@@ -27,33 +27,19 @@ const actions = [
     color: 'green',
     path: '/calendar/new',
   },
-  {
-    id: 3,
-    name: 'Upload Document',
-    description: 'Add files to your document library',
-    icon: (
-      <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
-      </svg>
-    ),
-    color: 'indigo',
-    path: '/documents/upload',
-  },
-  {
-    id: 4,
-    name: 'Create Report',
-    description: 'Generate analytics reports',
-    icon: (
-      <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-      </svg>
-    ),
-    color: 'purple',
-    path: '/reports/new',
-  },
-];
-
-const colorClasses = {
+    {
+      id: 3,
+      name: 'Add Doc / Report',
+      description: 'Upload files or generate reports',
+      icon: (
+        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+        </svg>
+      ),
+      color: 'indigo',
+      path: '/documents/new',
+    },
+  ];const colorClasses = {
   blue: {
     bgLight: 'bg-blue-100 dark:bg-blue-900/30',
     bgDark: 'bg-blue-500 dark:bg-blue-600',
