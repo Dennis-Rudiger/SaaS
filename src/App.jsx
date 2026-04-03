@@ -21,6 +21,7 @@ import NotFoundPage from './pages/NotFoundPage';
 import ProjectsPage from './pages/ProjectsPage';
 import CalendarPage from './pages/CalendarPage';
 import TeamPage from './pages/TeamPage';
+import AcceptInvite from './pages/AcceptInvite';
 import ProjectDetailsPage from './pages/ProjectDetailsPage';
 import DocumentsPage from './pages/DocumentsPage';
 import DemoPage from './pages/DemoPage'; // Import the new DemoPage
@@ -94,8 +95,10 @@ function App() {
               {/* Auth routes */}
               <Route path="/login" element={<LoginPage />} />
               <Route path="/signup" element={<SignupPage />} />
+              <Route path="/signup-invite" element={<SignupPage isInvite={true} />} />
               <Route path="/pricing" element={<PricingPage />} />
-              
+              <Route path="/join/:token" element={<AcceptInvite />} />
+
               {/* Protected routes requiring login */}
               <Route path="/dashboard" element={<ProtectedRoute><DashboardPage /></ProtectedRoute>} />
               <Route path="/settings" element={<ProtectedRoute><SettingsPage /></ProtectedRoute>} />
@@ -106,6 +109,7 @@ function App() {
               <Route path="/projects" element={<ProtectedRoute><SubscriptionGuard><ProjectsPage /></SubscriptionGuard></ProtectedRoute>} />
               <Route path="/projects/new" element={<ProtectedRoute><SubscriptionGuard><ProjectsPage openNew={true} /></SubscriptionGuard></ProtectedRoute>} />
               <Route path="/projects/:projectId" element={<ProtectedRoute><SubscriptionGuard><ProjectDetailsPage /></SubscriptionGuard></ProtectedRoute>} />
+              <Route path="/projects/:projectId/tasks/new" element={<ProtectedRoute><SubscriptionGuard><ProjectDetailsPage /></SubscriptionGuard></ProtectedRoute>} />
               
               <Route path="/calendar" element={<ProtectedRoute><SubscriptionGuard><CalendarPage /></SubscriptionGuard></ProtectedRoute>} />
               <Route path="/calendar/new" element={<ProtectedRoute><SubscriptionGuard><CalendarPage openNew={true} /></SubscriptionGuard></ProtectedRoute>} />

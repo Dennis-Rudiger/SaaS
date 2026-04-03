@@ -38,9 +38,14 @@ const LoginPage = () => {
       const { data, error } = await signIn(email, password);
       
       if (error) throw error;
-      
-      // Redirect to dashboard on successful login
-      navigate('/dashboard');
+
+      // Redirect on successful login
+      const pendingToken = sessionStorage.getItem('pending_invite_token');
+      if (pendingToken) {
+        navigate(`/join/${pendingToken}`);
+      } else {
+        navigate('/dashboard');
+      }
     } catch (error) {
       setError(error.message || 'Failed to sign in');
     } finally {

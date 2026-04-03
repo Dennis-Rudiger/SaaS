@@ -4,6 +4,8 @@ import { getProject, updateProject, deleteProject } from '../services/projectSer
 import DashboardLayout from '../components/dashboard/DashboardLayout';
 import DashboardHeader from '../components/dashboard/DashboardHeader';
 import ProjectForm from '../components/projects/ProjectForm';
+import TaskForm from '../components/dashboard/TaskForm';
+import { createTask } from '../services/taskService';
 import { format } from 'date-fns';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -15,7 +17,15 @@ const ProjectDetailsPage = () => {
   const [error, setError] = useState(null);
   const [showEditForm, setShowEditForm] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [showTaskForm, setShowTaskForm] = useState(false);
   const [deleteLoading, setDeleteLoading] = useState(false);
+
+  // Check if we should automatically open the task form based on URL path
+  useEffect(() => {
+    if (window.location.pathname.endsWith('/tasks/new')) {
+      setShowTaskForm(true);
+    }
+  }, []);
 
   useEffect(() => {
     fetchProject();
@@ -70,6 +80,22 @@ const ProjectDetailsPage = () => {
       setDeleteLoading(false);
       setShowDeleteConfirm(false);
     }
+  };
+
+  const handleCloseTaskForm = () => {
+    setShowTaskForm(false);
+    // If we're on the /tasks/new URL, go back to project default URL
+    if (window.location.pathname.endsWith('/tasks/new')) {
+      navigate(`/projects/${projectId}`, { replace: true });
+    }
+  };
+
+  const handleTaskSubmit = async (taskData) => {
+    const result = await createTask(taskData);
+    if (!result.error) {
+      await fetchProject(); // Refresh project list to include the new task
+    }
+    return result;
   };
 
   // Function to format date
@@ -235,15 +261,15 @@ const ProjectDetailsPage = () => {
         <div className="border-t border-gray-200 dark:border-gray-700 p-6">
           <div className="flex items-center justify-between mb-4">
             <h3 className="text-lg font-medium text-gray-900 dark:text-white">Tasks</h3>
-            <Link
-              to={`/projects/${projectId}/tasks/new`}
+            <button
+              onClick={() => setShowTaskForm(true)}
               className="inline-flex items-center text-sm font-medium text-primary dark:text-primary-light"
             >
               <svg className="mr-1 h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
               </svg>
               Add Task
-            </Link>
+            </button>
           </div>
           
           {project.tasks?.length > 0 ? (
@@ -307,15 +333,15 @@ const ProjectDetailsPage = () => {
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
               </svg>
               <p>No tasks found for this project.</p>
-              <Link
-                to={`/projects/${projectId}/tasks/new`}
+              <button
+                onClick={() => setShowTaskForm(true)}
                 className="mt-4 inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-primary hover:bg-primary-dark"
               >
                 <svg className="mr-2 -ml-1 h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
                 </svg>
                 Create First Task
-              </Link>
+              </button>
             </div>
           )}
         </div>
@@ -392,6 +418,17 @@ const ProjectDetailsPage = () => {
           </motion.div>
         )}
       </AnimatePresence>
+      {/* Tasks create/edit modal */}
+      <AnimatePresence>
+        {showTaskForm && (
+          <TaskForm
+            initialProjectId={projectId}
+            onClose={handleCloseTaskForm}
+            onSubmit={handleTaskSubmit}
+          />
+        )}
+      </AnimatePresence>
+
     </DashboardLayout>
   );
 };

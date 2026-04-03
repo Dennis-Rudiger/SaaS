@@ -1,64 +1,63 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { formatDistanceToNow } from 'date-fns';
-
-// Sample notifications data - in a real app, this would come from an API or context
-const sampleNotifications = [
-  {
-    id: 1,
-    title: 'New comment on Project X',
-    message: 'John Smith commented on your task "Design Homepage"',
-    timestamp: new Date(Date.now() - 25 * 60 * 1000), // 25 minutes ago
-    read: false,
-    type: 'comment',
-    link: '/projects/123',
-  },
-  {
-    id: 2,
-    title: 'Task assigned to you',
-    message: 'Sarah Johnson assigned you the task "Update API Documentation"',
-    timestamp: new Date(Date.now() - 3 * 60 * 60 * 1000), // 3 hours ago
-    read: false,
-    type: 'task',
-    link: '/tasks',
-  },
-  {
-    id: 3,
-    title: 'Project deadline approaching',
-    message: 'The deadline for "Mobile App Redesign" is tomorrow',
-    timestamp: new Date(Date.now() - 12 * 60 * 60 * 1000), // 12 hours ago
-    read: true,
-    type: 'deadline',
-    link: '/projects/456',
-  },
-  {
-    id: 4,
-    title: 'Team meeting reminder',
-    message: 'Weekly team meeting starts in 30 minutes',
-    timestamp: new Date(Date.now() - 29 * 60 * 60 * 1000), // 29 hours ago
-    read: true,
-    type: 'calendar',
-    link: '/calendar',
-  },
-  {
-    id: 5,
-    title: 'System update completed',
-    message: 'The system has been updated to version 2.3.0',
-    timestamp: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000), // 2 days ago
-    read: true,
-    type: 'system',
-    link: '#',
-  },
-];
+import { getNotifications, markAsRead, markAllAsRead, createTestNotification } from '../../services/notificationService';
+import { supabase } from '../../utils/supabaseClient';
 
 const NotificationsDropdown = () => {
-  // State for storing notifications and dropdown open status
-  const [notifications, setNotifications] = useState(sampleNotifications);
+  const [notifications, setNotifications] = useState([]);
   const [isOpen, setIsOpen] = useState(false);
+  const [loading, setLoading] = useState(true);
   const dropdownRef = useRef(null);
 
+  // Fetch notifications
+  const fetchNotifications = async () => {
+    setLoading(true);
+    const { data } = await getNotifications();
+    if (data) setNotifications(data);
+    setLoading(false);
+  };
+
+  useEffect(() => {
+    fetchNotifications();
+
+    // Subscribe to new notifications
+    const setupSubscription = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+
+      const subscription = supabase
+        .channel('public:notifications')
+        .on(
+          'postgres_changes',
+          {
+            event: 'INSERT',
+            schema: 'public',
+            table: 'notifications',
+            filter: `user_id=eq.${user.id}`
+          },
+          (payload) => {
+            setNotifications(current => [payload.new, ...current]);
+          }
+        )
+        .subscribe();
+
+      return () => {
+        supabase.removeChannel(subscription);
+      };
+    };
+
+    const unsubscribePromise = setupSubscription();
+
+    return () => {
+      unsubscribePromise.then(unsubscribe => {
+        if (unsubscribe) unsubscribe();
+      });
+    };
+  }, []);
+
   // Calculate unread notification count
-  const unreadCount = notifications.filter(notification => !notification.read).length;
+  const unreadCount = notifications.filter(n => !n.read).length;
 
   // Handle click outside to close dropdown
   useEffect(() => {
@@ -75,18 +74,36 @@ const NotificationsDropdown = () => {
   }, []);
 
   // Handle marking a notification as read
-  const markAsRead = (id) => {
-    setNotifications(notifications.map(notification => 
+  const handleMarkAsRead = async (id) => {
+    setNotifications(notifications.map(notification =>
       notification.id === id ? { ...notification, read: true } : notification
     ));
+    await markAsRead(id);
   };
 
   // Handle marking all notifications as read
-  const markAllAsRead = () => {
+  const handleMarkAllAsRead = async () => {
     setNotifications(notifications.map(notification => ({ ...notification, read: true })));
+    await markAllAsRead();
   };
 
-  // Get the appropriate icon for each notification type
+  // Add dummy notification for testing
+  const addTestNotification = async () => {
+    const types = ['comment', 'task', 'deadline', 'calendar', 'system'];
+    const randomType = types[Math.floor(Math.random() * types.length)];
+    const { data } = await createTestNotification({
+      title: `Test ${randomType} notification`,
+      message: `This is a test message for ${randomType}`,
+      type: randomType,
+      link: '/dashboard',
+      read: false
+    });
+    
+    // Manually add to state so it shows up immediately even if Realtime isn't configured
+    if (data) {
+      setNotifications(current => [data, ...current]);
+    }
+  };  // Get the appropriate icon for each notification type
   const getNotificationIcon = (type) => {
     switch (type) {
       case 'comment':
@@ -164,32 +181,43 @@ const NotificationsDropdown = () => {
             </h3>
             {unreadCount > 0 && (
               <button
-                onClick={markAllAsRead}
+                onClick={handleMarkAllAsRead}
                 className="text-xs text-primary dark:text-primary-light hover:text-primary-dark dark:hover:text-primary-light/80"
               >
                 Mark all as read
               </button>
             )}
           </div>
-          
+
           <div className="max-h-60 overflow-y-auto py-1">
-            {notifications.length === 0 ? (
+            {loading ? (
               <div className="py-4 px-4 text-center text-gray-500 dark:text-gray-400">
+                <p>Loading...</p>
+              </div>
+            ) : notifications.length === 0 ? (
+              <div className="py-4 px-4 text-center flex flex-col items-center justify-center text-gray-500 dark:text-gray-400">
                 <p>No notifications</p>
+                <button
+                  type="button"
+                  onClick={addTestNotification}
+                  className="mt-2 text-xs text-primary hover:text-primary-dark"
+                >
+                  Create test notification
+                </button>
               </div>
             ) : (
               notifications.map(notification => (
                 <Link
                   key={notification.id}
-                  to={notification.link}
+                  to={notification.link || '#'}
                   className={`block px-4 py-2 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors ${
                     notification.read ? '' : 'bg-blue-50 dark:bg-blue-900/20'
                   }`}
-                  onClick={() => markAsRead(notification.id)}
+                  onClick={() => handleMarkAsRead(notification.id)}
                 >
                   <div className="flex items-start">
                     {getNotificationIcon(notification.type)}
-                    
+
                     <div className="ml-3 flex-1">
                       <p className={`text-sm font-medium ${
                         notification.read ? 'text-gray-700 dark:text-gray-300' : 'text-gray-900 dark:text-white'
@@ -200,21 +228,19 @@ const NotificationsDropdown = () => {
                         {notification.message}
                       </p>
                       <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">
-                        {formatDistanceToNow(new Date(notification.timestamp), { addSuffix: true })}
+                        {notification.created_at ? formatDistanceToNow(new Date(notification.created_at), { addSuffix: true }) : 'just now'}
                       </p>
                     </div>
-                    
+
                     {/* Unread indicator */}
                     {!notification.read && (
-                      <span className="flex-shrink-0 h-2 w-2 rounded-full bg-primary"></span>
+                      <span className="flex-shrink-0 h-2 w-2 rounded-full bg-primary mt-1.5 align-middle"></span>
                     )}
                   </div>
                 </Link>
               ))
             )}
-          </div>
-
-          <div className="py-1">
+          </div>          <div className="py-1">
             <Link
               to="/notifications"
               className="block px-4 py-2 text-sm text-center text-primary dark:text-primary-light hover:bg-gray-50 dark:hover:bg-gray-700"

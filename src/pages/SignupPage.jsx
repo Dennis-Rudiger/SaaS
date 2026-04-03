@@ -5,7 +5,7 @@ import { motion } from 'framer-motion';
 import DarkModeToggle from '../components/DarkModeToggle';
 import { createUserProfile } from '../services/profileService';
 
-const SignupPage = () => {
+const SignupPage = ({ isInvite }) => {
   const [formData, setFormData] = useState({
     firstName: '',
     lastName: '',
@@ -99,8 +99,19 @@ const SignupPage = () => {
         });
       }
       
-      // Show success message or redirect
-      navigate('/login?registered=true');
+      const pendingToken = sessionStorage.getItem('pending_invite_token');
+      
+      if (data.session) {
+        // authed and ready
+        if (pendingToken) {
+          navigate(`/join/${pendingToken}`);
+        } else {
+          navigate('/dashboard');
+        }
+      } else {
+        // Should require email confirmation or redirected to login
+        navigate('/login?registered=true');
+      }
     } catch (error) {
       console.error('Signup error:', error);
       setFormError(error.message || 'Failed to create account. Please try again.');
@@ -142,10 +153,10 @@ const SignupPage = () => {
                 </h2>
               </Link>
               <h2 className="mt-6 text-3xl font-bold text-gray-900 dark:text-white">
-                Create your account
+                {isInvite ? 'Create account to join team' : 'Create your account'}
               </h2>
               <p className="mt-2 text-sm text-gray-600 dark:text-gray-400">
-                Start your 14-day free trial, no credit card required
+                {isInvite ? 'Join your team and start collaborating immediately' : 'Start your 14-day free trial, no credit card required'}
               </p>
             </div>
             

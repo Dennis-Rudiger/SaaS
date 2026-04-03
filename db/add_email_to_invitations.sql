@@ -1,0 +1,1 @@
+ALTER TABLE IF EXISTS public.team_invitations ADD COLUMN IF NOT EXISTS email TEXT;

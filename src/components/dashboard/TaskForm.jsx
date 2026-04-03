@@ -2,13 +2,13 @@
 import { motion } from 'framer-motion';
 import { getUserProjects } from '../../services/projectService';
 
-const TaskForm = ({ onClose, onSubmit }) => {
+const TaskForm = ({ onClose, onSubmit, initialProjectId = null }) => {
   const [projects, setProjects] = useState([]);
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
     title: '',
     description: '',
-    project_id: '',
+    project_id: initialProjectId || '',
     priority: 'medium',
     due_date: '',
   });
@@ -18,13 +18,13 @@ const TaskForm = ({ onClose, onSubmit }) => {
       const { data } = await getUserProjects();
       if (data) {
         setProjects(data);
-        if (data.length > 0) {
+        if (data.length > 0 && !initialProjectId) {
           setFormData(prev => ({ ...prev, project_id: data[0].id }));
         }
       }
     };
     fetchProjects();
-  }, []);
+  }, [initialProjectId]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
