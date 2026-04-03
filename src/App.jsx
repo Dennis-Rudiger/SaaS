@@ -24,6 +24,7 @@ import TeamPage from './pages/TeamPage';
 import AcceptInvite from './pages/AcceptInvite';
 import ProjectDetailsPage from './pages/ProjectDetailsPage';
 import DocumentsPage from './pages/DocumentsPage';
+import IntegrationsPage from './pages/IntegrationsPage';
 import DemoPage from './pages/DemoPage'; // Import the new DemoPage
 import TutorialsPage from './pages/TutorialsPage';
 import CommunityPage from './pages/CommunityPage';
@@ -117,6 +118,8 @@ function App() {
               <Route path="/team" element={<ProtectedRoute><SubscriptionGuard><TeamPage /></SubscriptionGuard></ProtectedRoute>} />
               <Route path="/team/new" element={<ProtectedRoute><SubscriptionGuard><TeamPage openNew={true} /></SubscriptionGuard></ProtectedRoute>} />
               
+              <Route path="/integrations" element={<ProtectedRoute><SubscriptionGuard><IntegrationsPage /></SubscriptionGuard></ProtectedRoute>} />
+
               <Route path="/tasks" element={<ProtectedRoute><SubscriptionGuard><DashboardPage /></SubscriptionGuard></ProtectedRoute>} />
               <Route path="/tasks/new" element={<ProtectedRoute><SubscriptionGuard><DashboardPage openNewTask={true} /></SubscriptionGuard></ProtectedRoute>} />
               <Route path="/documents" element={<ProtectedRoute><SubscriptionGuard><DocumentsPage /></SubscriptionGuard></ProtectedRoute>} />
